@@ -2,7 +2,6 @@
 
 ![screenshot](Images/1.png)
 ![screenshot2](Images/2.png)
-![screenshot3](Images/3.png)
 
 **Forum Thread:** https://forum.unity.com/threads/released-dynamic-panels-draggable-resizable-dockable-and-stackable-ui-panels.523106/
 
