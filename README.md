@@ -1,2 +1,2 @@
-# UnityDynamicPanels
-Draggable, resizable, dockable and stackable UI panel solution for Unity 3D
+# Dynamic Panels for Unity 3D
+Under construction, come back in a couple of hours
