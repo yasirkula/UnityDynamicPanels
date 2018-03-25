@@ -359,23 +359,14 @@ namespace DynamicPanels
 		{
 			if( tabContent == null || tabContent.Equals( null ) )
 				return -1;
-
-			RectTransform contentTR = tabContent.transform as RectTransform;
-			if( contentTR == null )
-			{
-				Debug.LogError( "Content must have a RectTransform!" );
-				return -1;
-			}
-
+			
 			// Reset active tab because otherwise, it acts buggy in rare cases
 			if( m_activeTab >= 0 && m_activeTab < tabs.Count )
 				tabs[m_activeTab].SetActive( false );
 
 			m_activeTab = -1;
 
-			if( tabIndex < 0 )
-				tabIndex = tabs.Count;
-			else if( tabIndex > tabs.Count )
+			if( tabIndex < 0 || tabIndex > tabs.Count )
 				tabIndex = tabs.Count;
 
 			int thisTabIndex = GetTabIndex( tabContent );
@@ -389,11 +380,11 @@ namespace DynamicPanels
 					tab = Instantiate( Resources.Load<PanelTab>( "DynamicPanelTab" ), tabsParent, false );
 					tabs.Insert( tabIndex, tab );
 
-					contentTR.anchorMin = Vector2.zero;
-					contentTR.anchorMax = Vector2.one;
-					contentTR.sizeDelta = Vector2.zero;
-					contentTR.anchoredPosition = Vector2.zero;
-					contentTR.localScale = Vector3.one;
+					tabContent.anchorMin = Vector2.zero;
+					tabContent.anchorMax = Vector2.one;
+					tabContent.sizeDelta = Vector2.zero;
+					tabContent.anchoredPosition = Vector2.zero;
+					tabContent.localScale = Vector3.one;
 				}
 				else
 				{
@@ -404,14 +395,15 @@ namespace DynamicPanels
 					tab.RectTransform.SetParent( tabsParent, false );
 
 					tabCurrentPanel.Internal.RemoveTab( tabCurrentPanelIndex, false );
-					Internal.RecalculateMinSize();
 				}
 
-				tab.Initialize( this, contentTR );
+				tab.Initialize( this, tabContent );
 				tab.RectTransform.SetSiblingIndex( tabIndex );
 
-				contentTR.SetParent( null, false ); // workaround for a rare internal Unity crash
-				contentTR.SetParent( contentParent, false );
+				tabContent.SetParent( null, false ); // workaround for a rare internal Unity crash
+				tabContent.SetParent( contentParent, false );
+
+				Internal.RecalculateMinSize();
 			}
 			else if( thisTabIndex != tabIndex )
 			{

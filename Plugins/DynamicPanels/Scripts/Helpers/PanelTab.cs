@@ -32,6 +32,8 @@ namespace DynamicPanels
 		private void Awake()
 		{
 			RectTransform = (RectTransform) transform;
+			MinSize = new Vector2( 100f, 100f );
+
 			iconHolder.preserveAspect = true;
         }
 

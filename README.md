@@ -40,6 +40,8 @@ There are a couple of settings in Dynamic Panels Canvas that you may want to pla
 - **Canvas Anchor Zone Length**: the length of the dockable area of the Dynamic Panels Canvas. When a tab is dragged and dropped onto that area, it will be docked to the edge of the Dynamic Panels Canvas
 - **Panel Anchor Zone Length**: the length of the dockable area inside a panel. When a tab is dragged and dropped onto that area, it will be docked to the panel. This area is enabled only for docked panels (you can't dock panels to free panels)
 
+**NOTE:** if you change the *Resources/DynamicPanel.prefab*, also make sure that the Panel's *Header Height* property is equal to the distance between the top of the panel and the bottom of the *PanelHeader* child object (which holds the tabs runtime).
+
 ## SCRIPTING API
 
 Before using the scripting API, import **DynamicPanels** namespace to your script(s): `using DynamicPanels;`
