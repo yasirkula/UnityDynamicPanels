@@ -27,7 +27,7 @@ namespace DynamicPanels
 				Panel result = content != null ? content.GetComponentInParent<Panel>() : null;
 				if( result == null )
 				{
-					result = Object.Instantiate( Resources.Load<Panel>( "DynamicPanel" ), canvas.RectTransform, false );
+					result = (Panel) Object.Instantiate( Resources.Load<Panel>( "DynamicPanel" ), canvas.RectTransform, false );
 					result.gameObject.name = "DynamicPanel";
 					result.RectTransform.SetAsLastSibling();
 

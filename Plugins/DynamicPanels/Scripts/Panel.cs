@@ -377,7 +377,7 @@ namespace DynamicPanels
 				int tabCurrentPanelIndex = -1;
 				if( tabCurrentPanel == null || ( tabCurrentPanelIndex = tabCurrentPanel.GetTabIndex( tabContent ) ) < 0 )
 				{
-					tab = Instantiate( Resources.Load<PanelTab>( "DynamicPanelTab" ), tabsParent, false );
+					tab = (PanelTab) Instantiate( Resources.Load<PanelTab>( "DynamicPanelTab" ), tabsParent, false );
 					tabs.Insert( tabIndex, tab );
 
 					tabContent.anchorMin = Vector2.zero;
