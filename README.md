@@ -2,7 +2,9 @@
 
 ![screenshot](Images/1.png)
 ![screenshot2](Images/2.png)
-*(used external assets in screenshots: [In-game Debug Console](https://www.assetstore.unity3d.com/en/#!/content/68068) and [Runtime Inspector](https://www.assetstore.unity3d.com/en/#!/content/111349))*
+*(used external assets in screenshots: [In-game Debug Console](https://github.com/yasirkula/UnityIngameDebugConsole) and [Runtime Inspector & Hierarchy](https://github.com/yasirkula/UnityRuntimeInspector))*
+
+**Available on Asset Store:** https://www.assetstore.unity3d.com/en/#!/content/114126
 
 **Forum Thread:** https://forum.unity.com/threads/released-dynamic-panels-draggable-resizable-dockable-and-stackable-ui-panels.523106/
 
@@ -140,7 +142,7 @@ Panel groups are used to hold docked panels together. In a complex hierarchy, a 
 
 ## EXAMPLE CODE
 
-The following example code creates 3 panels, one with 2 tabs, and creates a layout with them in a L-shape. The final output can be seen in the following picture:
+The following example code creates 3 panels -one with 2 tabs- and generates a L-shaped layout with them. The final output can be seen in the following picture:
 
 ![dynamic_panels_canvas](Images/5.png)
 
