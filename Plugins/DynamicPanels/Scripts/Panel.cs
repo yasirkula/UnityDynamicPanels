@@ -103,7 +103,7 @@ namespace DynamicPanels
 				}
 
 				Vector2 touchPos;
-				RectTransformUtility.ScreenPointToLocalPointInRectangle( panel.tabsParent, pointer.position, panel.Canvas.UnityCanvas.worldCamera, out touchPos );
+				RectTransformUtility.ScreenPointToLocalPointInRectangle( panel.tabsParent, pointer.position, panel.Canvas.Internal.worldCamera, out touchPos );
 
 				float tabPosition = 0f;
 				for( int i = 0; i < tabCount; i++ )
@@ -495,7 +495,7 @@ namespace DynamicPanels
 				return;
 
 			Vector2 position;
-			RectTransformUtility.ScreenPointToLocalPointInRectangle( Canvas.RectTransform, screenPoint, Canvas.UnityCanvas.worldCamera, out position );
+			RectTransformUtility.ScreenPointToLocalPointInRectangle( Canvas.RectTransform, screenPoint, Canvas.Internal.worldCamera, out position );
 			
 			RectTransform.anchoredPosition = position + ( Canvas.Size - RectTransform.sizeDelta ) * 0.5f;
 			( (UnanchoredPanelGroup) Group ).RestrictPanelToBounds( this );
@@ -620,7 +620,7 @@ namespace DynamicPanels
 		private void OnResize( Direction direction, Vector2 screenPoint )
 		{
 			Vector2 localPoint;
-			RectTransformUtility.ScreenPointToLocalPointInRectangle( RectTransform, screenPoint, Canvas.UnityCanvas.worldCamera, out localPoint );
+			RectTransformUtility.ScreenPointToLocalPointInRectangle( RectTransform, screenPoint, Canvas.Internal.worldCamera, out localPoint );
 
 			Vector2 sizeDelta = RectTransform.sizeDelta;
 			if( !IsDocked )

@@ -53,9 +53,9 @@ namespace DynamicPanels
 				secondDirection = Direction.None;
 			else
 			{
-				if( RectTransformUtility.RectangleContainsScreenPoint( helperBefore.RectTransform, eventData.pressPosition, m_panel.Canvas.UnityCanvas.worldCamera ) )
+				if( RectTransformUtility.RectangleContainsScreenPoint( helperBefore.RectTransform, eventData.pressPosition, m_panel.Canvas.Internal.worldCamera ) )
 					secondDirection = helperBefore.direction;
-				else if( RectTransformUtility.RectangleContainsScreenPoint( helperAfter.RectTransform, eventData.pressPosition, m_panel.Canvas.UnityCanvas.worldCamera ) )
+				else if( RectTransformUtility.RectangleContainsScreenPoint( helperAfter.RectTransform, eventData.pressPosition, m_panel.Canvas.Internal.worldCamera ) )
 					secondDirection = helperAfter.direction;
 				else
 					secondDirection = Direction.None;

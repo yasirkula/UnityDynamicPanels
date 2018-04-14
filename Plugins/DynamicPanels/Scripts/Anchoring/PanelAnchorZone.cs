@@ -48,7 +48,7 @@ namespace DynamicPanels
 		private Direction GetAnchorDirection( PointerEventData eventData )
 		{
 			Vector2 pointerPos;
-			RectTransformUtility.ScreenPointToLocalPointInRectangle( m_panel.RectTransform, eventData.position, m_panel.Canvas.UnityCanvas.worldCamera, out pointerPos );
+			RectTransformUtility.ScreenPointToLocalPointInRectangle( m_panel.RectTransform, eventData.position, m_panel.Canvas.Internal.worldCamera, out pointerPos );
 
 			Vector2 size = m_panel.RectTransform.sizeDelta;
 			size.y -= m_panel.Internal.HeaderHeight;

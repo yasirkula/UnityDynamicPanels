@@ -11,8 +11,18 @@ namespace DynamicPanels
 		public class InternalSettings
 		{
 			private readonly DynamicPanelsCanvas canvas;
+			public readonly Camera worldCamera;
 
-			public InternalSettings( DynamicPanelsCanvas canvas ) { this.canvas = canvas; }
+			public InternalSettings( DynamicPanelsCanvas canvas )
+			{
+				this.canvas = canvas;
+
+				if( canvas.UnityCanvas.renderMode == RenderMode.ScreenSpaceOverlay || 
+					( canvas.UnityCanvas.renderMode == RenderMode.ScreenSpaceCamera && canvas.UnityCanvas.worldCamera == null ) )
+					worldCamera = null;
+				else
+					worldCamera = canvas.UnityCanvas.worldCamera ?? Camera.main;
+			}
 
 			public List<PanelProperties> InitialPanelsUnanchored
 			{

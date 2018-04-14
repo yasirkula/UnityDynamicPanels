@@ -29,7 +29,7 @@ namespace DynamicPanels
 			}
 
 			pointerId = eventData.pointerId;
-			RectTransformUtility.ScreenPointToLocalPointInRectangle( m_panel.RectTransform, eventData.position, m_panel.Canvas.UnityCanvas.worldCamera, out m_initialTouchPos );
+			RectTransformUtility.ScreenPointToLocalPointInRectangle( m_panel.RectTransform, eventData.position, m_panel.Canvas.Internal.worldCamera, out m_initialTouchPos );
 		}
 
 		public void OnDrag( PointerEventData eventData )

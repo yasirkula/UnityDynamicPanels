@@ -41,7 +41,7 @@ namespace DynamicPanels
 			}
 		}
 
-		protected const float MIN_SIZE_TOLERANCE = 0E-4f;
+		protected const float MIN_SIZE_TOLERANCE = 1E-4f;
 
 		protected readonly Direction direction;
 		protected readonly List<IPanelGroupElement> elements;

@@ -268,7 +268,7 @@ namespace DynamicPanels
 				if( !canvases[i].gameObject.activeInHierarchy )
 					continue;
 
-				Camera worldCamera = canvases[i].UnityCanvas.worldCamera;
+				Camera worldCamera = canvases[i].Internal.worldCamera;
 				if( RectTransformUtility.RectangleContainsScreenPoint( canvases[i].RectTransform, screenPoint, worldCamera ) )
 				{
 					RectTransform panelAtTop = null;
@@ -388,7 +388,7 @@ namespace DynamicPanels
 			if( draggedPanel == panelHeader.Panel )
 			{
 				Vector2 touchPos;
-				RectTransformUtility.ScreenPointToLocalPointInRectangle( draggedPanel.RectTransform, draggingPointer.position, previewPanelCanvas.UnityCanvas.worldCamera, out touchPos );
+				RectTransformUtility.ScreenPointToLocalPointInRectangle( draggedPanel.RectTransform, draggingPointer.position, previewPanelCanvas.Internal.worldCamera, out touchPos );
 
 				draggedPanel.RectTransform.anchoredPosition += touchPos - panelHeader.InitialTouchPos;
 			}
@@ -426,7 +426,7 @@ namespace DynamicPanels
 			if( draggedPanel.NumberOfTabs <= 1 )
 				draggedPanel.Internal.PanelAnchorZone.SetActive( false );
 
-			if( RectTransformUtility.RectangleContainsScreenPoint( draggedPanel.Internal.HeaderAnchorZone.RectTransform, draggingPointer.position, draggedPanel.Canvas.UnityCanvas.worldCamera ) )
+			if( RectTransformUtility.RectangleContainsScreenPoint( draggedPanel.Internal.HeaderAnchorZone.RectTransform, draggingPointer.position, draggedPanel.Canvas.Internal.worldCamera ) )
 			{
 				draggedPanel.Internal.HeaderAnchorZone.OnPointerEnter( draggingPointer );
 				draggingPointer.pointerEnter = draggedPanel.Internal.HeaderAnchorZone.gameObject;
@@ -455,7 +455,7 @@ namespace DynamicPanels
 				else
 				{
 					Vector2 position;
-					RectTransformUtility.ScreenPointToLocalPointInRectangle( previewPanelCanvas.RectTransform, draggingPointer.position, previewPanelCanvas.UnityCanvas.worldCamera, out position );
+					RectTransformUtility.ScreenPointToLocalPointInRectangle( previewPanelCanvas.RectTransform, draggingPointer.position, previewPanelCanvas.Internal.worldCamera, out position );
 					previewPanel.anchoredPosition = position;
 					previewPanel.sizeDelta = panelTab.Panel.FloatingSize;
 				}

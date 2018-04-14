@@ -23,7 +23,7 @@ This asset helps you create dynamic panels using Unity's UI system. These panels
 
 ## HOW TO
 
-First, import **DynamicPanels.unitypackage** to your project. Afterwards, add **Dynamic Panels Canvas** component to the *RectTransform* that you want to move your panels inside. This RectTransform doesn't have to be the Canvas object. It can be any child of it and can be of any custom size. The only thing to note here is that, for *World Space* canvases to work with Dynamic Panels Canvas, canvas' **Event Camera** property should have a value (usually the Main Camera).
+First, import **DynamicPanels.unitypackage** to your project. Afterwards, add **Dynamic Panels Canvas** component to the *RectTransform* that you want to move your panels inside. This RectTransform doesn't have to be the Canvas object. It can be any child of it and can be of any custom size.
 
 There are two ways to create panels: by using the GUI of Dynamic Panels Canvas or via Scripting API. There are also two types of panels: *free panels* that can be moved around and resized freely and *docked panels* that are moved by the layout system, depending on where it is docked to. A panel can have multiple tabs.
 
