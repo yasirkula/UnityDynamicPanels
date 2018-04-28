@@ -17,6 +17,11 @@ namespace DynamicPanels
 			{
 				this.canvas = canvas;
 
+#if UNITY_EDITOR
+				if( canvas.UnityCanvas == null ) // is null while inspecting this component in edit mode
+					return;
+#endif
+
 				if( canvas.UnityCanvas.renderMode == RenderMode.ScreenSpaceOverlay || 
 					( canvas.UnityCanvas.renderMode == RenderMode.ScreenSpaceCamera && canvas.UnityCanvas.worldCamera == null ) )
 					worldCamera = null;
