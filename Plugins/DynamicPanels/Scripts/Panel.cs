@@ -328,6 +328,12 @@ namespace DynamicPanels
 			AnchorZonesSetActive( false );
 		}
 
+		private void Start()
+		{
+			if( !Internal.IsDummy )
+				PanelNotificationCenter.Internal.PanelCreated( this );
+		}
+
 		private void OnEnable()
 		{
 			UnanchoredPanelGroup unanchoredGroup = Group as UnanchoredPanelGroup;
@@ -336,18 +342,29 @@ namespace DynamicPanels
 				unanchoredGroup.RestrictPanelToBounds( this );
 				RectTransform.SetAsLastSibling();
 			}
+
+			if( !Internal.IsDummy )
+				PanelNotificationCenter.Internal.PanelBecameActive( this );
 		}
 
 		private void OnDisable()
 		{
 			if( Group != null && Canvas.gameObject.activeInHierarchy )
 				Canvas.UnanchoredPanelGroup.AddElement( this );
+
+			if( !Internal.IsDummy )
+				PanelNotificationCenter.Internal.PanelBecameInactive( this );
 		}
 
 		private void OnDestroy()
 		{
 			if( !isQuitting )
+			{
 				PanelManager.Instance.UnregisterPanel( this );
+
+				if( !Internal.IsDummy )
+					PanelNotificationCenter.Internal.PanelDestroyed( this );
+			}
 		}
 
 		private void OnApplicationQuit()
@@ -430,7 +447,10 @@ namespace DynamicPanels
 		public void SetTabTitle( int tabIndex, Sprite icon, string label )
 		{
 			if( tabIndex >= 0 && tabIndex < tabs.Count )
-				tabs[tabIndex].SetTitle( icon, label );
+			{
+				tabs[tabIndex].Icon = icon;
+				tabs[tabIndex].Label = label;
+			}
 		}
 
 		public void SetTabMinSize( int tabIndex, Vector2 minSize )
@@ -462,7 +482,23 @@ namespace DynamicPanels
 
 			return null;
 		}
-		
+
+		public Sprite GetTabIcon( int tabIndex )
+		{
+			if( tabIndex >= 0 && tabIndex < tabs.Count )
+				return tabs[tabIndex].Icon;
+
+			return null;
+		}
+
+		public string GetTabLabel( int tabIndex )
+		{
+			if( tabIndex >= 0 && tabIndex < tabs.Count )
+				return tabs[tabIndex].Label;
+
+			return null;
+		}
+
 		public void DockToRoot( Direction direction )
 		{
 			PanelManager.Instance.AnchorPanel( this, Canvas, direction );

@@ -82,6 +82,10 @@ Before using the scripting API, import **DynamicPanels** namespace to your scrip
 
 `RectTransform GetTabContent( int tabIndex )`: returns the content associated to a tab
 
+`Sprite GetTabIcon( int tabIndex )`: returns the icon of a tab
+
+`string GetTabLabel( int tabIndex )`: returns the label a tab
+
 `void DockToRoot( Direction direction )`: docks the panel to an edge of the Dynamic Panels Canvas
 
 `void DockToPanel( IPanelGroupElement anchor, Direction direction )`: docks the panel to another panel or panel group. It is not possible to dock a panel to a free panel
@@ -139,6 +143,22 @@ Panel groups are used to hold docked panels together. In a complex hierarchy, a 
 ### DynamicPanelsCanvas
 
 `void ForceRebuildLayoutImmediate()`: immediately rebuilds the layout of the Dynamic Panels Canvas, if it is dirty. This process involves a couple of steps: elements in groups are validated (elements that no longer belong to that group are removed, empty child groups are deleted, etc.), minimum sizes are calculated, bounds of the elements are recalculated and so on. This step is quite processor intensive and therefore is not immediately called when e.g. a group is changed. Rather, it is called on LateUpdate to process everything in a batch (it is only called if something has changed). But this brings out an issue: if you are modifying the layout via Scripting API, you won't be able to access the correct size/position/minimum size values of layout elements (panels/panel groups), resize them in the same frame that you modify them (resizes happen instantly and do not count as modification, but the layout should be up-to-date) or iterate through the elements of a panel group correctly. To solve this issue, you can simply call this function after modifying the layout to rebuild it immediately.
+
+### PanelNotificationCenter
+
+Notification center raises certain events during panels' lifecycle. It also holds a reference to each alive panel and therefore, can be used to iterate over all panels conveniently.
+
+`static event PanelDelegate OnPanelCreated`: raised when a new panel is created. *PanelDelegate* takes a *Panel* parameter
+
+`static event PanelDelegate OnPanelDestroyed`: raised when a panel is destroyed
+
+`static event PanelDelegate OnPanelBecameActive`: raised when a panel becomes active in the hierarchy
+
+`static event PanelDelegate OnPanelBecameInactive`: raised when a panel becomes inactive in the hierarchy
+
+`int NumberOfPanels { get; }`: returns the number of alive panels (including inactive panels)
+
+`static Panel GetPanel( int panelIndex )`: returns a panel (it can be inactive)
 
 ## EXAMPLE CODE
 

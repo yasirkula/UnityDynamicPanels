@@ -25,6 +25,29 @@ namespace DynamicPanels
 		[SerializeField]
 		private Text nameHolder;
 
+		public Sprite Icon
+		{
+			get { return iconHolder != null ? iconHolder.sprite : null; }
+			set
+			{
+				if( iconHolder != null )
+				{
+					iconHolder.gameObject.SetActive( value != null );
+					iconHolder.sprite = value;
+				}
+			}
+		}
+
+		public string Label
+		{
+			get { return nameHolder != null ? nameHolder.text : null; }
+			set
+			{
+				if( nameHolder != null && value != null )
+					nameHolder.text = value;
+			}
+		}
+
 		private int pointerId = PanelManager.NON_EXISTING_TOUCH;
 
 		public bool IsBeingDetached { get { return pointerId != PanelManager.NON_EXISTING_TOUCH; } }
@@ -46,18 +69,6 @@ namespace DynamicPanels
 		{
 			m_panel = panel;
 			Content = content;
-		}
-
-		public void SetTitle( Sprite icon, string name )
-		{
-			if( iconHolder != null )
-			{
-				iconHolder.gameObject.SetActive( icon != null );
-				iconHolder.sprite = icon;
-			}
-
-			if( nameHolder != null && name != null )
-				nameHolder.text = name;
 		}
 
 		public void SetMinSize( Vector2 minSize )
