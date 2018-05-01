@@ -156,7 +156,7 @@ Notification center raises certain events during panels' lifecycle. It also hold
 
 `static event PanelDelegate OnPanelBecameInactive`: raised when a panel becomes inactive in the hierarchy
 
-`int NumberOfPanels { get; }`: returns the number of alive panels (including inactive panels)
+`static int NumberOfPanels { get; }`: returns the number of alive panels (including inactive panels)
 
 `static Panel GetPanel( int panelIndex )`: returns a panel (it can be inactive)
 
