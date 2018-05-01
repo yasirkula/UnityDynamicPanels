@@ -84,7 +84,7 @@ Before using the scripting API, import **DynamicPanels** namespace to your scrip
 
 `Sprite GetTabIcon( int tabIndex )`: returns the icon of a tab
 
-`string GetTabLabel( int tabIndex )`: returns the label a tab
+`string GetTabLabel( int tabIndex )`: returns the label of a tab
 
 `void DockToRoot( Direction direction )`: docks the panel to an edge of the Dynamic Panels Canvas
 
