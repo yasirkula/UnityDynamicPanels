@@ -177,6 +177,7 @@ namespace DynamicPanels
 				background = gameObject.AddComponent<Image>();
 				background.sprite = dummyPanel.Internal.BackgroundSprite;
 				background.color = Color.clear;
+				background.raycastTarget = false;
 			}
 
 			PanelManager.Instance.RegisterCanvas( this );
