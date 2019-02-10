@@ -16,7 +16,7 @@ namespace DynamicPanels
 			public void UpdateLayout() { group.UpdateLayout(); }
 			public void UpdateSurroundings( IPanelGroupElement left, IPanelGroupElement top, IPanelGroupElement right, IPanelGroupElement bottom ) { group.UpdateSurroundings( left, top, right, bottom ); }
 			public void TryChangeSizeOf( IPanelGroupElement element, Direction direction, float deltaSize ) { group.TryChangeSizeOf( element, direction, deltaSize ); }
-			public void ResizeElementTo( IPanelGroupElement element, Vector2 newSize ) { group.ResizeElementTo( element, newSize ); }
+			public void ResizeElementTo( IPanelGroupElement element, Vector2 newSize, Direction horizontalDir, Direction verticalDir ) { group.ResizeElementTo( element, newSize, horizontalDir, verticalDir ); }
 			public void ReplaceElement( IPanelGroupElement beforeElement, IPanelGroupElement afterElement ) { group.ReplaceElement( beforeElement, afterElement ); }
 
 			public void EnsureMinimumSize()
@@ -45,7 +45,7 @@ namespace DynamicPanels
 
 		protected readonly Direction direction;
 		protected readonly List<IPanelGroupElement> elements;
-		
+
 		protected readonly IPanelGroupElement[] surroundings;
 
 		public DynamicPanelsCanvas Canvas { get; private set; }
@@ -59,9 +59,9 @@ namespace DynamicPanels
 
 		private List<ElementDirtyProperties> resizeProperties;
 		private int resizePropsIndex;
-		
+
 		protected bool isDirty = false;
-		
+
 		public int Count { get { return elements.Count; } }
 		public IPanelGroupElement this[int index] { get { return elements[index]; } }
 
@@ -75,7 +75,7 @@ namespace DynamicPanels
 			elements = new List<IPanelGroupElement>( 2 );
 			surroundings = new IPanelGroupElement[4];
 		}
-		
+
 		public bool IsInSameDirection( Direction direction )
 		{
 			if( direction == Direction.None )
@@ -156,7 +156,7 @@ namespace DynamicPanels
 
 			Size = size;
 		}
-		
+
 		protected virtual void UpdateLayout()
 		{
 			if( isDirty )
@@ -303,42 +303,50 @@ namespace DynamicPanels
 			}
 		}
 
-		protected void ResizeElementTo( IPanelGroupElement element, Vector2 newSize )
+		protected void ResizeElementTo( IPanelGroupElement element, Vector2 newSize, Direction horizontalDir, Direction verticalDir )
 		{
+			if( horizontalDir != Direction.Left && horizontalDir != Direction.Right )
+				horizontalDir = Direction.Right;
+			if( verticalDir != Direction.Bottom && verticalDir != Direction.Top )
+				verticalDir = Direction.Bottom;
+
+			Direction horizontalOpposite = horizontalDir.Opposite();
+			Direction verticalOpposite = verticalDir.Opposite();
+
 			float flexibleWidth = newSize.x - element.Size.x;
 			if( flexibleWidth > MIN_SIZE_TOLERANCE )
 			{
-				TryChangeSizeOf( element, Direction.Right, flexibleWidth );
+				TryChangeSizeOf( element, horizontalDir, flexibleWidth );
 
 				flexibleWidth = newSize.x - element.Size.x;
 				if( flexibleWidth > MIN_SIZE_TOLERANCE )
-					TryChangeSizeOf( element, Direction.Left, flexibleWidth );
+					TryChangeSizeOf( element, horizontalOpposite, flexibleWidth );
 			}
 			else if( flexibleWidth < -MIN_SIZE_TOLERANCE )
 			{
-				TryChangeSizeOf( element.GetSurroundingElement( Direction.Right ), Direction.Left, -flexibleWidth );
+				TryChangeSizeOf( element.GetSurroundingElement( horizontalDir ), horizontalOpposite, -flexibleWidth );
 
 				flexibleWidth = newSize.x - element.Size.x;
 				if( flexibleWidth < -MIN_SIZE_TOLERANCE )
-					TryChangeSizeOf( element.GetSurroundingElement( Direction.Left ), Direction.Right, -flexibleWidth );
+					TryChangeSizeOf( element.GetSurroundingElement( horizontalOpposite ), horizontalDir, -flexibleWidth );
 			}
 
 			float flexibleHeight = newSize.y - element.Size.y;
 			if( flexibleHeight > MIN_SIZE_TOLERANCE )
 			{
-				TryChangeSizeOf( element, Direction.Bottom, flexibleHeight );
+				TryChangeSizeOf( element, verticalDir, flexibleHeight );
 
 				flexibleHeight = newSize.y - element.Size.y;
 				if( flexibleHeight > MIN_SIZE_TOLERANCE )
-					TryChangeSizeOf( element, Direction.Top, flexibleHeight );
+					TryChangeSizeOf( element, verticalOpposite, flexibleHeight );
 			}
 			else if( flexibleHeight < -MIN_SIZE_TOLERANCE )
 			{
-				TryChangeSizeOf( element.GetSurroundingElement( Direction.Bottom ), Direction.Top, -flexibleHeight );
+				TryChangeSizeOf( element.GetSurroundingElement( verticalDir ), verticalOpposite, -flexibleHeight );
 
 				flexibleHeight = newSize.y - element.Size.y;
 				if( flexibleHeight < -MIN_SIZE_TOLERANCE )
-					TryChangeSizeOf( element.GetSurroundingElement( Direction.Top ), Direction.Bottom, -flexibleHeight );
+					TryChangeSizeOf( element.GetSurroundingElement( verticalOpposite ), verticalDir, -flexibleHeight );
 			}
 		}
 
@@ -521,10 +529,10 @@ namespace DynamicPanels
 			AddElementAt( index, afterElement );
 		}
 
-		public void ResizeTo( Vector2 newSize )
+		public void ResizeTo( Vector2 newSize, Direction horizontalDir = Direction.Right, Direction verticalDir = Direction.Bottom )
 		{
 			if( Group != null )
-				Group.ResizeElementTo( this, newSize );
+				Group.ResizeElementTo( this, newSize, horizontalDir, verticalDir );
 		}
 
 		public void DockToRoot( Direction direction )

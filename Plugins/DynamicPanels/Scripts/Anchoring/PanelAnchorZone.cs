@@ -11,7 +11,7 @@ namespace DynamicPanels
 			if( anchorDirection == Direction.None )
 				return false;
 
-			Panel detachedPanel = PanelManager.Instance.DetachPanelTab( panelTab.Panel, panelTab.Panel.Internal.GetTabIndex( panelTab ) );
+			Panel detachedPanel = PanelManager.Instance.DetachPanelTab( panelTab.Panel, panelTab.Panel.GetTabIndex( panelTab ) );
 			PanelManager.Instance.AnchorPanel( detachedPanel, m_panel, anchorDirection );
 
 			return true;

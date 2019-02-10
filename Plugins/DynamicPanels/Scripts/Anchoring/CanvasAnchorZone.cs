@@ -14,7 +14,7 @@ namespace DynamicPanels
 
 		public override bool Execute( PanelTab panelTab, PointerEventData eventData )
 		{
-			Panel detachedPanel = PanelManager.Instance.DetachPanelTab( panelTab.Panel, panelTab.Panel.Internal.GetTabIndex( panelTab ) );
+			Panel detachedPanel = PanelManager.Instance.DetachPanelTab( panelTab.Panel, panelTab.Panel.GetTabIndex( panelTab ) );
 			PanelManager.Instance.AnchorPanel( detachedPanel, m_panel.Canvas, direction );
 
 			return true;

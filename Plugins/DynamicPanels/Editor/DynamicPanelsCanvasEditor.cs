@@ -11,18 +11,23 @@ namespace DynamicPanels
 	{
 		private DynamicPanelsCanvas.InternalSettings settings;
 
+		private const float LABEL_WIDTH = 100f;
+		private const float ANCHORED_PANELS_PREVIEW_HEIGHT = 350f;
+		private const string SHOW_IDS_PREF = "DynamicPanels_ShowIDs";
+
+		private static bool showIDs;
+
 		private List<ReorderableList> reorderableLists;
 		private int reorderableListIndex;
-
 		private bool isReorderableListSelected;
-		private float labelWidth = 100f;
-		private float anchoredPanelsPreviewHeight = 350f;
 
 		private DynamicPanelsCanvas.AnchoredPanelProperties selectedAnchoredPanel;
 		private DynamicPanelsCanvas.AnchoredPanelProperties justClickedAnchoredPanel;
+		private List<DynamicPanelsCanvas.PanelTabProperties> selectedAnchoredPanelTabs;
 
 		private GUIStyle anchoredPanelGUIStyle;
 
+		private SerializedProperty leaveFreeSpace;
 		private SerializedProperty minimumFreeSpace;
 		private SerializedProperty panelResizableAreaLength;
 		private SerializedProperty canvasAnchorZoneLength;
@@ -34,11 +39,15 @@ namespace DynamicPanels
 
 			reorderableLists = new List<ReorderableList>();
 			selectedAnchoredPanel = settings.InitialPanelsAnchored;
-			
+			selectedAnchoredPanelTabs = selectedAnchoredPanel.panel.tabs;
+
+			leaveFreeSpace = serializedObject.FindProperty( "m_leaveFreeSpace" );
 			minimumFreeSpace = serializedObject.FindProperty( "minimumFreeSpace" );
 			panelResizableAreaLength = serializedObject.FindProperty( "m_panelResizableAreaLength" );
 			canvasAnchorZoneLength = serializedObject.FindProperty( "m_canvasAnchorZoneLength" );
 			panelAnchorZoneLength = serializedObject.FindProperty( "m_panelAnchorZoneLength" );
+
+			showIDs = EditorPrefs.GetBool( SHOW_IDS_PREF, false );
 
 			Undo.undoRedoPerformed -= OnUndo;
 			Undo.undoRedoPerformed += OnUndo;
@@ -47,7 +56,16 @@ namespace DynamicPanels
 		private void OnUndo()
 		{
 			settings = ( (DynamicPanelsCanvas) target ).Internal;
+
 			selectedAnchoredPanel = settings.InitialPanelsAnchored;
+			selectedAnchoredPanelTabs = selectedAnchoredPanel.panel.tabs;
+		}
+
+		[MenuItem( "CONTEXT/DynamicPanelsCanvas/Toggle Show IDs" )]
+		private static void ToggleShowIDs()
+		{
+			showIDs = !EditorPrefs.GetBool( SHOW_IDS_PREF, false );
+			EditorPrefs.SetBool( SHOW_IDS_PREF, showIDs );
 		}
 
 		public override void OnInspectorGUI()
@@ -64,6 +82,8 @@ namespace DynamicPanels
 			if( justClickedAnchoredPanel != null && Event.current.type == EventType.Layout )
 			{
 				selectedAnchoredPanel = justClickedAnchoredPanel;
+				selectedAnchoredPanelTabs = selectedAnchoredPanel.panel.tabs;
+
 				justClickedAnchoredPanel = null;
 			}
 
@@ -77,7 +97,13 @@ namespace DynamicPanels
 			GUILayout.BeginVertical();
 
 			EditorGUILayout.LabelField( "= Properties =", EditorStyles.boldLabel );
+			EditorGUILayout.PropertyField( leaveFreeSpace );
+			GUILayout.BeginHorizontal();
+			GUILayout.Space( 20 );
+			GUI.enabled = guiEnabled && leaveFreeSpace.boolValue;
 			EditorGUILayout.PropertyField( minimumFreeSpace );
+			GUI.enabled = guiEnabled;
+			GUILayout.EndHorizontal();
 			EditorGUILayout.PropertyField( panelResizableAreaLength );
 			EditorGUILayout.PropertyField( canvasAnchorZoneLength );
 			EditorGUILayout.PropertyField( panelAnchorZoneLength );
@@ -91,12 +117,19 @@ namespace DynamicPanels
 				GUILayout.Label( "Can't edit in Play mode" );
 			else
 			{
-				List<DynamicPanelsCanvas.PanelProperties> initialPanelsUnanchored = ( (DynamicPanelsCanvas) target ).Internal.InitialPanelsUnanchored;
+				List<DynamicPanelsCanvas.PanelProperties> initialPanelsUnanchored = settings.InitialPanelsUnanchored;
 				int selectedReorderableListIndex = -1;
 				for( int i = 0; i < initialPanelsUnanchored.Count; i++ )
 				{
 					if( DrawReorderableListFor( initialPanelsUnanchored[i] ) )
 						selectedReorderableListIndex = i;
+
+					if( i < initialPanelsUnanchored.Count - 1 )
+					{
+						// Draw a horizontal line to separate the panels
+						GUILayout.Space( 5f );
+						GUILayout.Box( GUIContent.none, GUILayout.ExpandWidth( true ), GUILayout.Height( 2f ) );
+					}
 
 					GUILayout.Space( 5f );
 				}
@@ -136,9 +169,9 @@ namespace DynamicPanels
 				GUILayout.Label( "Can't edit in Play mode" );
 			else
 			{
-				DynamicPanelsCanvas.AnchoredPanelProperties initialPanelsAnchored = ( (DynamicPanelsCanvas) target ).Internal.InitialPanelsAnchored;
+				DynamicPanelsCanvas.AnchoredPanelProperties initialPanelsAnchored = settings.InitialPanelsAnchored;
 
-				Rect previewRect = EditorGUILayout.GetControlRect( false, anchoredPanelsPreviewHeight );
+				Rect previewRect = EditorGUILayout.GetControlRect( false, ANCHORED_PANELS_PREVIEW_HEIGHT );
 				DrawAnchoredPanelsPreview( previewRect, initialPanelsAnchored );
 
 				if( selectedAnchoredPanel != null )
@@ -147,11 +180,23 @@ namespace DynamicPanels
 					GUILayout.Space( 5f );
 					EditorGUILayout.LabelField( "Selected panel:", EditorStyles.boldLabel );
 
-					if( selectedAnchoredPanel != settings.InitialPanelsAnchored )
+					if( selectedAnchoredPanelTabs != settings.InitialPanelsAnchored.panel.tabs )
+					{
+						string initialSizeLabel = selectedAnchoredPanel.initialSize == Vector2.zero ? "Initial Size (not set):" : "Initial Size:";
+
+						EditorGUI.BeginChangeCheck();
+						Vector2 panelInitialSize = EditorGUILayout.Vector2Field( initialSizeLabel, selectedAnchoredPanel.initialSize );
+						if( EditorGUI.EndChangeCheck() )
+						{
+							Undo.RecordObject( (DynamicPanelsCanvas) target, "Change Initial Size" );
+							selectedAnchoredPanel.initialSize = panelInitialSize;
+						}
+
 						DrawReorderableListFor( selectedAnchoredPanel.panel );
+					}
 					else
 						GUILayout.Label( "- nothing -" );
-					
+
 					Direction direction = ShowDirectionButtons( "Dock new panel inside: " );
 					if( direction != Direction.None )
 					{
@@ -161,7 +206,7 @@ namespace DynamicPanels
 						selectedAnchoredPanel.subPanels.Add( new DynamicPanelsCanvas.AnchoredPanelProperties() { anchorDirection = direction } );
 					}
 
-					if( selectedAnchoredPanel != settings.InitialPanelsAnchored )
+					if( selectedAnchoredPanelTabs != settings.InitialPanelsAnchored.panel.tabs )
 					{
 						GUILayout.Space( 5f );
 						if( GUILayout.Button( "Remove Selected", GUILayout.Height( 1.35f * EditorGUIUtility.singleLineHeight ) ) )
@@ -248,6 +293,7 @@ namespace DynamicPanels
 
 		private void DrawAnchoredPanelsPreview( Rect rect, DynamicPanelsCanvas.AnchoredPanelProperties props )
 		{
+			bool shouldDrawSelf = leaveFreeSpace.boolValue || props != settings.InitialPanelsAnchored || props.subPanels == null || props.subPanels.Count == 0;
 			if( props.subPanels != null && props.subPanels.Count > 0 )
 			{
 				int horizontal = 1, vertical = 1;
@@ -258,6 +304,21 @@ namespace DynamicPanels
 						horizontal++;
 					else
 						vertical++;
+				}
+
+				if( !shouldDrawSelf )
+				{
+					Direction anchorDirection = props.subPanels[props.subPanels.Count - 1].anchorDirection;
+					if( anchorDirection == Direction.Left || anchorDirection == Direction.Right )
+					{
+						if( horizontal > 1 )
+							horizontal--;
+					}
+					else
+					{
+						if( vertical > 1 )
+							vertical--;
+					}
 				}
 
 				float perWidth = rect.width / horizontal;
@@ -295,6 +356,9 @@ namespace DynamicPanels
 				}
 			}
 
+			if( !shouldDrawSelf )
+				return;
+
 			string label;
 			if( props == settings.InitialPanelsAnchored )
 				label = "Free space";
@@ -317,7 +381,7 @@ namespace DynamicPanels
 				else
 					label = string.Concat( label, "\n", tabs.Count.ToString(), " tabs" );
 			}
-			
+
 			if( selectedAnchoredPanel == props )
 			{
 				Color guiColor = GUI.color;
@@ -430,15 +494,19 @@ namespace DynamicPanels
 		private bool DrawReorderableListFor( DynamicPanelsCanvas.PanelProperties panelProperties )
 		{
 			isReorderableListSelected = false;
+			float elementHeight = ( showIDs ? 4 : 3 ) * EditorGUIUtility.singleLineHeight + 2;
 
 			List<DynamicPanelsCanvas.PanelTabProperties> tabs = panelProperties.tabs;
 			if( reorderableLists.Count > reorderableListIndex )
+			{
 				reorderableLists[reorderableListIndex].list = tabs;
+				reorderableLists[reorderableListIndex].elementHeight = elementHeight;
+			}
 			else
 			{
 				ReorderableList reorderableList = new ReorderableList( tabs, typeof( DynamicPanelsCanvas.PanelTabProperties ), true, true, true, true )
 				{
-					elementHeight = 3 * EditorGUIUtility.singleLineHeight + 2,
+					elementHeight = elementHeight,
 					onAddCallback = ( thisList ) =>
 					{
 						Undo.IncrementCurrentGroup();
@@ -476,22 +544,25 @@ namespace DynamicPanels
 			rect.y += 2;
 
 			float lineHeight = EditorGUIUtility.singleLineHeight;
-			float contentWidth = rect.width - labelWidth;
+			float contentWidth = rect.width - LABEL_WIDTH;
 			Vector2 tabMinimumSize = tab.minimumSize;
 
-			Rect contentLabelRect = new Rect( rect.x, rect.y, labelWidth, lineHeight );
-			Rect contentRect = new Rect( rect.x + labelWidth, rect.y, contentWidth, lineHeight );
+			Rect contentLabelRect = new Rect( rect.x, rect.y, LABEL_WIDTH, lineHeight );
+			Rect contentRect = new Rect( rect.x + LABEL_WIDTH, rect.y, contentWidth, lineHeight );
 
-			Rect tabMetadataLabelRect = new Rect( rect.x, rect.y + lineHeight, labelWidth, lineHeight );
-			Rect tabLabelRect = new Rect( rect.x + labelWidth, rect.y + lineHeight, contentWidth * 0.5f, lineHeight );
-			Rect tabIconRect = new Rect( rect.x + labelWidth + contentWidth * 0.5f, rect.y + lineHeight, contentWidth * 0.5f, lineHeight );
+			Rect tabMetadataLabelRect = new Rect( rect.x, rect.y + lineHeight, LABEL_WIDTH, lineHeight );
+			Rect tabLabelRect = new Rect( rect.x + LABEL_WIDTH, rect.y + lineHeight, contentWidth * 0.5f, lineHeight );
+			Rect tabIconRect = new Rect( rect.x + LABEL_WIDTH + contentWidth * 0.5f, rect.y + lineHeight, contentWidth * 0.5f, lineHeight );
 
-			Rect minSizeLabelRect = new Rect( rect.x, rect.y + 2 * lineHeight, labelWidth, lineHeight );
-			Rect minSizeXRect = new Rect( rect.x + labelWidth, rect.y + 2 * lineHeight, contentWidth * 0.5f, lineHeight );
-			Rect minSizeYRect = new Rect( rect.x + labelWidth + contentWidth * 0.5f, rect.y + 2 * lineHeight, contentWidth * 0.5f, lineHeight );
+			Rect minSizeLabelRect = new Rect( rect.x, rect.y + 2 * lineHeight, LABEL_WIDTH, lineHeight );
+			Rect minSizeXRect = new Rect( rect.x + LABEL_WIDTH, rect.y + 2 * lineHeight, contentWidth * 0.5f, lineHeight );
+			Rect minSizeYRect = new Rect( rect.x + LABEL_WIDTH + contentWidth * 0.5f, rect.y + 2 * lineHeight, contentWidth * 0.5f, lineHeight );
 
-			EditorGUI.BeginChangeCheck();
+			Rect idLabelRect = new Rect( rect.x, rect.y + 3 * lineHeight, LABEL_WIDTH, lineHeight );
+			Rect idRect = new Rect( rect.x + LABEL_WIDTH, rect.y + 3 * lineHeight, contentWidth, lineHeight );
+
 			GUI.Label( contentLabelRect, "Content:" );
+			EditorGUI.BeginChangeCheck();
 			RectTransform content = EditorGUI.ObjectField( contentRect, GUIContent.none, tab.content, typeof( RectTransform ), true ) as RectTransform;
 			if( EditorGUI.EndChangeCheck() )
 			{
@@ -524,6 +595,18 @@ namespace DynamicPanels
 			{
 				Undo.RecordObject( (DynamicPanelsCanvas) target, "Change Minimum Size" );
 				tab.minimumSize = tabMinimumSize;
+			}
+
+			if( showIDs )
+			{
+				GUI.Label( idLabelRect, "ID:" );
+				EditorGUI.BeginChangeCheck();
+				string tabID = EditorGUI.TextField( idRect, GUIContent.none, tab.id );
+				if( EditorGUI.EndChangeCheck() )
+				{
+					Undo.RecordObject( (DynamicPanelsCanvas) target, "Change ID" );
+					tab.id = tabID;
+				}
 			}
 		}
 	}

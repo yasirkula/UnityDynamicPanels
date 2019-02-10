@@ -7,14 +7,36 @@ namespace DynamicPanels
 	[DisallowMultipleComponent]
 	public class PanelTab : MonoBehaviour, IPointerClickHandler, IBeginDragHandler, IDragHandler, IEndDragHandler
 	{
-		private Panel m_panel;
-		public Panel Panel { get { return m_panel; } }
+		public class InternalSettings
+		{
+			private readonly PanelTab tab;
+			public readonly RectTransform RectTransform;
 
-		public RectTransform RectTransform { get; private set; }
+			public InternalSettings( PanelTab tab )
+			{
+				this.tab = tab;
+				RectTransform = (RectTransform) tab.transform;
+			}
 
-		public RectTransform Content { get; private set; }
+			public bool IsBeingDetached { get { return tab.pointerId != PanelManager.NON_EXISTING_TOUCH; } }
 
-		public Vector2 MinSize { get; private set; }
+			public void Initialize( Panel panel, RectTransform content )
+			{
+				tab.m_panel = panel;
+				tab.Content = content;
+			}
+
+			public void Stop()
+			{
+				if( tab.pointerId != PanelManager.NON_EXISTING_TOUCH )
+				{
+					tab.ResetBackgroundColor();
+					tab.pointerId = PanelManager.NON_EXISTING_TOUCH;
+				}
+			}
+
+			public void SetActive( bool activeState ) { tab.SetActive( activeState ); }
+		}
 
 		[SerializeField]
 		private Image background;
@@ -24,6 +46,47 @@ namespace DynamicPanels
 
 		[SerializeField]
 		private Text nameHolder;
+
+		public InternalSettings Internal { get; private set; }
+
+		private string m_id = null;
+		public string ID
+		{
+			get { return m_id; }
+			set
+			{
+				if( !string.IsNullOrEmpty( value ) && m_id != value )
+				{
+					PanelNotificationCenter.Internal.TabIDChanged( this, m_id, value );
+					m_id = value;
+				}
+			}
+		}
+
+		private Panel m_panel;
+		public Panel Panel { get { return m_panel; } }
+
+		public int Index
+		{
+			get { return m_panel.GetTabIndex( this ); }
+			set { m_panel.AddTab( this, value ); }
+		}
+
+		public RectTransform Content { get; private set; }
+
+		private Vector2 m_minSize;
+		public Vector2 MinSize
+		{
+			get { return m_minSize; }
+			set
+			{
+				if( m_minSize != value )
+				{
+					m_minSize = value;
+					m_panel.Internal.RecalculateMinSize();
+				}
+			}
+		}
 
 		public Sprite Icon
 		{
@@ -50,36 +113,44 @@ namespace DynamicPanels
 
 		private int pointerId = PanelManager.NON_EXISTING_TOUCH;
 
-		public bool IsBeingDetached { get { return pointerId != PanelManager.NON_EXISTING_TOUCH; } }
-
 		private void Awake()
 		{
-			RectTransform = (RectTransform) transform;
-			MinSize = new Vector2( 100f, 100f );
+			m_minSize = new Vector2( 100f, 100f );
+			Internal = new InternalSettings( this );
 
 			iconHolder.preserveAspect = true;
-        }
+		}
+
+		private void Start()
+		{
+			if( string.IsNullOrEmpty( m_id ) )
+				ID = System.Guid.NewGuid().ToString();
+		}
 
 		private void OnEnable()
 		{
 			pointerId = PanelManager.NON_EXISTING_TOUCH;
 		}
 
-		public void Initialize( Panel panel, RectTransform content )
+		private void OnDestroy()
 		{
-			m_panel = panel;
-			Content = content;
+			PanelNotificationCenter.Internal.TabIDChanged( this, m_id, null );
 		}
 
-		public void SetMinSize( Vector2 minSize )
+		public void AttachTo( Panel panel, int tabIndex = -1 )
 		{
-			MinSize = minSize;
+			panel.AddTab( Content, tabIndex );
 		}
 
-		public void SetActive( bool activeState )
+		public Panel Detach()
+		{
+			return m_panel.DetachTab( this );
+		}
+
+		private void SetActive( bool activeState )
 		{
 			if( Content == null || Content.Equals( null ) )
-				m_panel.Internal.RemoveTab( m_panel.Internal.GetTabIndex( this ), true );
+				m_panel.Internal.RemoveTab( m_panel.GetTabIndex( this ), true );
 			else
 			{
 				if( activeState )
@@ -91,15 +162,15 @@ namespace DynamicPanels
 			}
 		}
 
-		public void OnPointerClick( PointerEventData eventData )
+		void IPointerClickHandler.OnPointerClick( PointerEventData eventData )
 		{
 			if( Content == null || Content.Equals( null ) )
-				m_panel.Internal.RemoveTab( m_panel.Internal.GetTabIndex( this ), true );
+				m_panel.Internal.RemoveTab( m_panel.GetTabIndex( this ), true );
 			else
-				m_panel.ActiveTab = m_panel.Internal.GetTabIndex( this );
+				m_panel.ActiveTab = m_panel.GetTabIndex( this );
 		}
 
-		public void OnBeginDrag( PointerEventData eventData )
+		void IBeginDragHandler.OnBeginDrag( PointerEventData eventData )
 		{
 			// Cancel drag event if panel is already being dragged by another pointer,
 			// or PanelManager does not want the panel to be dragged at that moment
@@ -111,9 +182,9 @@ namespace DynamicPanels
 
 			pointerId = eventData.pointerId;
 			background.color = m_panel.TabDetachingColor;
-        }
+		}
 
-		public void OnDrag( PointerEventData eventData )
+		void IDragHandler.OnDrag( PointerEventData eventData )
 		{
 			if( eventData.pointerId != pointerId )
 			{
@@ -122,9 +193,9 @@ namespace DynamicPanels
 			}
 
 			PanelManager.Instance.OnPanelTabTranslate( this, eventData );
-        }
+		}
 
-		public void OnEndDrag( PointerEventData eventData )
+		void IEndDragHandler.OnEndDrag( PointerEventData eventData )
 		{
 			if( eventData.pointerId != pointerId )
 				return;
@@ -135,18 +206,9 @@ namespace DynamicPanels
 			PanelManager.Instance.OnEndPanelTabTranslate( this, eventData );
 		}
 
-		public void Stop()
-		{
-			if( pointerId != PanelManager.NON_EXISTING_TOUCH )
-			{
-				ResetBackgroundColor();
-				pointerId = PanelManager.NON_EXISTING_TOUCH;
-			}
-		}
-
 		private void ResetBackgroundColor()
 		{
-			if( m_panel.ActiveTab == m_panel.Internal.GetTabIndex( this ) )
+			if( m_panel.ActiveTab == m_panel.GetTabIndex( this ) )
 				background.color = m_panel.TabSelectedColor;
 			else
 				background.color = m_panel.TabNormalColor;

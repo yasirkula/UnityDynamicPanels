@@ -15,7 +15,7 @@ namespace DynamicPanels
 		private static PanelManager m_instance;
 		public static PanelManager Instance
 		{
-            get
+			get
 			{
 				if( m_instance == null )
 					m_instance = new GameObject( "PanelManager" ).AddComponent<PanelManager>();
@@ -23,13 +23,13 @@ namespace DynamicPanels
 				return m_instance;
 			}
 		}
-		
+
 		private List<DynamicPanelsCanvas> canvases = new List<DynamicPanelsCanvas>( 8 );
 		private List<Panel> panels = new List<Panel>( 32 );
 
 		private Panel draggedPanel = null;
 		private AnchorZoneBase hoveredAnchorZone = null;
-		
+
 		private RectTransform previewPanel = null;
 		private DynamicPanelsCanvas previewPanelCanvas;
 
@@ -144,7 +144,7 @@ namespace DynamicPanels
 		}
 
 		public void AnchorPanel( IPanelGroupElement source, IPanelGroupElement anchor, Direction anchorDirection )
-		{	
+		{
 			PanelGroup group = anchor.Group;
 			if( group is UnanchoredPanelGroup )
 			{
@@ -173,7 +173,7 @@ namespace DynamicPanels
 				if( anchor.Size.x > 0f )
 					size.x = anchor.Size.x;
 			}
-			
+
 			if( panel != null )
 				panel.RectTransform.sizeDelta = size;
 			else
@@ -207,7 +207,7 @@ namespace DynamicPanels
 
 				group.Internal.ReplaceElement( anchor, newGroup );
 			}
-			
+
 			if( panel != null )
 			{
 				if( draggedPanel == panel )
@@ -248,7 +248,7 @@ namespace DynamicPanels
 				else
 				{
 					Panel newPanel = PanelUtils.Internal.CreatePanel( null, panel.Canvas );
-					newPanel.AddTab( panel.GetTabContent( tabIndex ) );
+					newPanel.AddTab( panel[tabIndex].Content );
 					newPanel.FloatingSize = panel.FloatingSize;
 
 					if( newPanel.Internal.ContentScrollRect != null )
@@ -447,7 +447,7 @@ namespace DynamicPanels
 			if( draggedPanel == panelTab.Panel )
 			{
 				Rect previewRect;
-                if( hoveredAnchorZone != null && hoveredAnchorZone.GetAnchoredPreviewRectangleAt( draggingPointer, out previewRect ) )
+				if( hoveredAnchorZone != null && hoveredAnchorZone.GetAnchoredPreviewRectangleAt( draggingPointer, out previewRect ) )
 				{
 					previewPanel.anchoredPosition = previewRect.position;
 					previewPanel.sizeDelta = previewRect.size;
@@ -471,7 +471,7 @@ namespace DynamicPanels
 					hoveredAnchorZone.OnPointerExit( draggingPointer );
 
 				AnchorZonesSetActive( false );
-				
+
 				if( targetAnchor == null || !targetAnchor.Execute( panelTab, draggingPointer ) )
 				{
 					Panel detachedPanel = DetachPanelTab( draggedPanel, draggedPanel.GetTabIndex( panelTab.Content ) );
@@ -530,7 +530,7 @@ namespace DynamicPanels
 			previewPanel.pivot = new Vector2( 0.5f, 0.5f );
 
 			previewPanel.gameObject.SetActive( false );
-			
+
 			this.previewPanel = previewPanel;
 		}
 	}

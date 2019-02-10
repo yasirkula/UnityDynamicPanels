@@ -82,17 +82,6 @@ namespace DynamicPanels
 				}
 			}
 
-			public int GetTabIndex( PanelTab tab )
-			{
-				for( int i = 0; i < panel.tabs.Count; i++ )
-				{
-					if( panel.tabs[i] == tab )
-						return i;
-				}
-
-				return -1;
-			}
-
 			public int GetTabIndexAt( PointerEventData pointer, out Vector2 tabPreviewRect ) // x: position, y: size
 			{
 				int tabCount = panel.tabs.Count;
@@ -108,21 +97,21 @@ namespace DynamicPanels
 				float tabPosition = 0f;
 				for( int i = 0; i < tabCount; i++ )
 				{
-					float nextTabPosition = panel.tabs[i].RectTransform.anchoredPosition.x;
+					float nextTabPosition = panel.tabs[i].Internal.RectTransform.anchoredPosition.x;
 					if( touchPos.x < nextTabPosition )
 					{
 						if( i > 0 )
 							i--;
 
-						tabPreviewRect = new Vector2( tabPosition, panel.tabs[i].RectTransform.sizeDelta.x + 4f );
+						tabPreviewRect = new Vector2( tabPosition, panel.tabs[i].Internal.RectTransform.sizeDelta.x + 4f );
 						return i;
 					}
 
 					tabPosition = nextTabPosition;
 				}
 
-				float tabSize = panel.tabs[tabCount - 1].RectTransform.sizeDelta.x;
-				if( !panel.tabs[tabCount - 1].IsBeingDetached && touchPos.x > tabPosition + tabSize * 0.66f )
+				float tabSize = panel.tabs[tabCount - 1].Internal.RectTransform.sizeDelta.x;
+				if( !panel.tabs[tabCount - 1].Internal.IsBeingDetached && touchPos.x > tabPosition + tabSize * 0.66f )
 				{
 					float remainingSize = panel.Size.x - tabPosition - tabSize;
 					if( remainingSize < 30f )
@@ -177,6 +166,7 @@ namespace DynamicPanels
 						minSize.y = tabMinSize.y;
 				}
 
+				minSize.y += panel.headerHeight;
 				panel.MinSize = minSize;
 			}
 
@@ -188,12 +178,12 @@ namespace DynamicPanels
 				panel.header.Stop();
 
 				for( int i = 0; i < panel.tabs.Count; i++ )
-					panel.tabs[i].Stop();
+					panel.tabs[i].Internal.Stop();
 
 				for( int i = 0; i < panel.resizeZones.Length; i++ )
 					panel.resizeZones[i].Stop();
 			}
-			
+
 			public void AnchorZonesSetActive( bool value ) { panel.AnchorZonesSetActive( value ); }
 			public void OnResize( Direction direction, Vector2 screenPoint ) { panel.OnResize( direction, screenPoint ); }
 			public void OnTranslate( Vector2 deltaPosition ) { panel.OnTranslate( deltaPosition ); }
@@ -285,6 +275,21 @@ namespace DynamicPanels
 		}
 
 		public int NumberOfTabs { get { return tabs.Count; } }
+		public PanelTab this[int tabIndex]
+		{
+			get
+			{
+				if( tabIndex >= 0 && tabIndex < tabs.Count )
+					return tabs[tabIndex];
+
+				return null;
+			}
+			set
+			{
+				if( value != null && !value.Equals( null ) )
+					AddTab( value.Content, tabIndex );
+			}
+		}
 
 		private int m_activeTab = -1;
 		public int ActiveTab
@@ -295,16 +300,16 @@ namespace DynamicPanels
 				if( m_activeTab != value && value >= 0 && value < tabs.Count )
 				{
 					if( m_activeTab >= 0 && m_activeTab < tabs.Count )
-						tabs[m_activeTab].SetActive( false );
+						tabs[m_activeTab].Internal.SetActive( false );
 
 					m_activeTab = value;
-					tabs[m_activeTab].SetActive( true );
+					tabs[m_activeTab].Internal.SetActive( true );
 
 					contentScrollRect = tabs[m_activeTab].Content.GetComponentInChildren<ScrollRect>();
 				}
 			}
 		}
-		
+
 		public bool IsDocked { get { return !( Group is UnanchoredPanelGroup ); } }
 
 		private ScrollRect contentScrollRect;
@@ -372,14 +377,14 @@ namespace DynamicPanels
 			isQuitting = true;
 		}
 
-		public int AddTab( RectTransform tabContent, int tabIndex = -1 )
+		public PanelTab AddTab( RectTransform tabContent, int tabIndex = -1 )
 		{
 			if( tabContent == null || tabContent.Equals( null ) )
-				return -1;
-			
+				return null;
+
 			// Reset active tab because otherwise, it acts buggy in rare cases
 			if( m_activeTab >= 0 && m_activeTab < tabs.Count )
-				tabs[m_activeTab].SetActive( false );
+				tabs[m_activeTab].Internal.SetActive( false );
 
 			m_activeTab = -1;
 
@@ -389,10 +394,8 @@ namespace DynamicPanels
 			int thisTabIndex = GetTabIndex( tabContent );
 			if( thisTabIndex == -1 )
 			{
-				PanelTab tab;
-				Panel tabCurrentPanel = tabContent.GetComponentInParent<Panel>();
-				int tabCurrentPanelIndex = -1;
-				if( tabCurrentPanel == null || ( tabCurrentPanelIndex = tabCurrentPanel.GetTabIndex( tabContent ) ) < 0 )
+				PanelTab tab = PanelUtils.GetAssociatedTab( tabContent );
+				if( tab == null )
 				{
 					tab = (PanelTab) Instantiate( Resources.Load<PanelTab>( "DynamicPanelTab" ), tabsParent, false );
 					tabs.Insert( tabIndex, tab );
@@ -405,17 +408,16 @@ namespace DynamicPanels
 				}
 				else
 				{
-					tab = tabCurrentPanel.tabs[tabCurrentPanelIndex];
 					tabs.Insert( tabIndex, tab );
 
-					tab.RectTransform.SetParent( null, false ); // workaround for a rare internal Unity crash
-					tab.RectTransform.SetParent( tabsParent, false );
+					tab.Internal.RectTransform.SetParent( null, false ); // workaround for a rare internal Unity crash
+					tab.Internal.RectTransform.SetParent( tabsParent, false );
 
-					tabCurrentPanel.Internal.RemoveTab( tabCurrentPanelIndex, false );
+					tab.Panel.Internal.RemoveTab( tab.Index, false );
 				}
 
-				tab.Initialize( this, tabContent );
-				tab.RectTransform.SetSiblingIndex( tabIndex );
+				tab.Internal.Initialize( this, tabContent );
+				tab.Internal.RectTransform.SetSiblingIndex( tabIndex );
 
 				tabContent.SetParent( null, false ); // workaround for a rare internal Unity crash
 				tabContent.SetParent( contentParent, false );
@@ -428,14 +430,30 @@ namespace DynamicPanels
 					tabIndex = tabs.Count - 1;
 
 				PanelTab tab = tabs[thisTabIndex];
-				tab.RectTransform.SetSiblingIndex( tabIndex );
+				tab.Internal.RectTransform.SetSiblingIndex( tabIndex );
 
 				tabs.RemoveAt( thisTabIndex );
 				tabs.Insert( tabIndex, tab );
 			}
 
 			ActiveTab = tabIndex;
-			return tabIndex;
+			return tabs[tabIndex];
+		}
+
+		public PanelTab AddTab( PanelTab tab, int tabIndex = -1 )
+		{
+			if( tab == null || tab.Equals( null ) )
+				return null;
+
+			return AddTab( tab.Content, tabIndex );
+		}
+
+		public PanelTab AddTab( string tabID, int tabIndex = -1 )
+		{
+			PanelTab tab;
+			PanelNotificationCenter.TryGetTab( tabID, out tab );
+
+			return AddTab( tab );
 		}
 
 		public void RemoveTab( int tabIndex )
@@ -444,6 +462,20 @@ namespace DynamicPanels
 				Internal.RemoveTab( tabIndex, true );
 		}
 
+		public void RemoveTab( PanelTab tab )
+		{
+			RemoveTab( GetTabIndex( tab ) );
+		}
+
+		public void RemoveTab( string tabID )
+		{
+			PanelTab tab;
+			PanelNotificationCenter.TryGetTab( tabID, out tab );
+
+			RemoveTab( tab );
+		}
+
+		[System.Obsolete( "Use panel[tabIndex].Icon and panel[tabIndex].Title instead", true )]
 		public void SetTabTitle( int tabIndex, Sprite icon, string label )
 		{
 			if( tabIndex >= 0 && tabIndex < tabs.Count )
@@ -453,15 +485,11 @@ namespace DynamicPanels
 			}
 		}
 
+		[System.Obsolete( "Use panel[tabIndex].MinSize instead", true )]
 		public void SetTabMinSize( int tabIndex, Vector2 minSize )
 		{
-			if( tabIndex >= 0 && tabIndex < tabs.Count && tabs[tabIndex].MinSize != minSize )
-			{
-				minSize.y += headerHeight;
-
-				tabs[tabIndex].SetMinSize( minSize );
-				Internal.RecalculateMinSize();
-			}
+			if( tabIndex >= 0 && tabIndex < tabs.Count )
+				tabs[tabIndex].MinSize = minSize;
 		}
 
 		public int GetTabIndex( RectTransform tabContent )
@@ -475,6 +503,36 @@ namespace DynamicPanels
 			return -1;
 		}
 
+		public int GetTabIndex( PanelTab tab )
+		{
+			for( int i = 0; i < tabs.Count; i++ )
+			{
+				if( tabs[i] == tab )
+					return i;
+			}
+
+			return -1;
+		}
+
+		public int GetTabIndex( string tabID )
+		{
+			PanelTab tab;
+			if( PanelNotificationCenter.TryGetTab( tabID, out tab ) )
+				return GetTabIndex( tab );
+
+			return -1;
+		}
+
+		public PanelTab GetTab( RectTransform tabContent )
+		{
+			int tabIndex = GetTabIndex( tabContent );
+			if( tabIndex >= 0 )
+				return tabs[tabIndex];
+
+			return null;
+		}
+
+		[System.Obsolete( "Use panel[tabIndex].Content instead", true )]
 		public RectTransform GetTabContent( int tabIndex )
 		{
 			if( tabIndex >= 0 && tabIndex < tabs.Count )
@@ -483,6 +541,7 @@ namespace DynamicPanels
 			return null;
 		}
 
+		[System.Obsolete( "Use panel[tabIndex].Icon instead", true )]
 		public Sprite GetTabIcon( int tabIndex )
 		{
 			if( tabIndex >= 0 && tabIndex < tabs.Count )
@@ -491,6 +550,7 @@ namespace DynamicPanels
 			return null;
 		}
 
+		[System.Obsolete( "Use panel[tabIndex].Label instead", true )]
 		public string GetTabLabel( int tabIndex )
 		{
 			if( tabIndex >= 0 && tabIndex < tabs.Count )
@@ -518,7 +578,12 @@ namespace DynamicPanels
 		{
 			return PanelManager.Instance.DetachPanelTab( this, tabIndex );
 		}
-		
+
+		public Panel DetachTab( PanelTab tab )
+		{
+			return DetachTab( GetTabIndex( tab ) );
+		}
+
 		public void BringForward()
 		{
 			if( !IsDocked )
@@ -532,15 +597,15 @@ namespace DynamicPanels
 
 			Vector2 position;
 			RectTransformUtility.ScreenPointToLocalPointInRectangle( Canvas.RectTransform, screenPoint, Canvas.Internal.worldCamera, out position );
-			
+
 			RectTransform.anchoredPosition = position + ( Canvas.Size - RectTransform.sizeDelta ) * 0.5f;
 			( (UnanchoredPanelGroup) Group ).RestrictPanelToBounds( this );
 		}
 
-		public void ResizeTo( Vector2 newSize )
+		public void ResizeTo( Vector2 newSize, Direction horizontalDir = Direction.Right, Direction verticalDir = Direction.Bottom )
 		{
 			if( IsDocked )
-				Group.Internal.ResizeElementTo( this, newSize );
+				Group.Internal.ResizeElementTo( this, newSize, horizontalDir, verticalDir );
 			else
 				FloatingSize = newSize;
 		}
@@ -634,7 +699,7 @@ namespace DynamicPanels
 
 			if( headerAnchorZone != null )
 				headerAnchorZone.SetActive( value );
-        }
+		}
 
 		private bool CanResizeInDirection( Direction direction )
 		{

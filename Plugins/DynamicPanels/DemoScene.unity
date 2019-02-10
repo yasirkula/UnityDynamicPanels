@@ -269,28 +269,34 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e09a4b7ae29894a4194f95800d897bb0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  m_id: ad68d1e6-0ea8-4b80-b2cd-49680bcdc689
+  m_leaveFreeSpace: 1
   minimumFreeSpace: {x: 50, y: 50}
   m_panelResizableAreaLength: 15
-  m_canvasAnchorZoneLength: 45
-  m_panelAnchorZoneLength: 100
+  m_canvasAnchorZoneLength: 20
+  m_panelAnchorZoneLength: 80
   initialPanelsUnanchored: []
   initialPanelsAnchoredSerialized:
   - panel:
       tabs: []
     anchorDirection: 0
+    initialSize: {x: 0, y: 0}
     childCount: 1
     indexOfFirstChild: 1
   - panel:
       tabs:
       - content: {fileID: 1231044452}
+        id: 1a5df545-f031-4dff-8d79-c6c72407f744
         minimumSize: {x: 200, y: 200}
         tabLabel: Yellow Tab
         tabIcon: {fileID: 0}
       - content: {fileID: 480963707}
+        id: a8af3244-61e4-4ab5-be9c-08c17ee182a5
         minimumSize: {x: 200, y: 200}
         tabLabel: Purple Tab
         tabIcon: {fileID: 0}
     anchorDirection: 3
+    initialSize: {x: 0, y: 0}
     childCount: 0
     indexOfFirstChild: 2
 --- !u!1 &480963706
@@ -393,7 +399,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0.5}
   m_AnchorMax: {x: 0, y: 0.5}
-  m_AnchoredPosition: {x: 466, y: -115}
+  m_AnchoredPosition: {x: 465.99997, y: -115}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0, y: 0.5}
 --- !u!114 &491618929
@@ -545,13 +551,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e09a4b7ae29894a4194f95800d897bb0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  m_id: 2be1f88c-39da-4087-b957-7dda543cc09d
+  m_leaveFreeSpace: 1
   minimumFreeSpace: {x: 50, y: 50}
   m_panelResizableAreaLength: 15
-  m_canvasAnchorZoneLength: 45
-  m_panelAnchorZoneLength: 100
+  m_canvasAnchorZoneLength: 20
+  m_panelAnchorZoneLength: 80
   initialPanelsUnanchored:
   - tabs:
     - content: {fileID: 801020840}
+      id: 655a8208-4a9a-460c-807f-63e56b25ef0e
       minimumSize: {x: 100, y: 100}
       tabLabel: Green Tab
       tabIcon: {fileID: 0}
@@ -559,28 +568,34 @@ MonoBehaviour:
   - panel:
       tabs: []
     anchorDirection: 0
+    initialSize: {x: 0, y: 0}
     childCount: 2
     indexOfFirstChild: 1
   - panel:
       tabs:
       - content: {fileID: 2038115445}
+        id: 706988d7-ad78-4684-bfaa-0566a6f8447f
         minimumSize: {x: 150, y: 150}
         tabLabel: Blue Tab
         tabIcon: {fileID: 0}
     anchorDirection: 1
+    initialSize: {x: 0, y: 0}
     childCount: 0
     indexOfFirstChild: 2
   - panel:
       tabs:
       - content: {fileID: 1199676140}
+        id: d36d315f-1177-4acf-8805-66a7c7342f98
         minimumSize: {x: 150, y: 150}
         tabLabel: Red Tab
         tabIcon: {fileID: 0}
       - content: {fileID: 491618928}
+        id: 5bc34423-650b-42dc-ac78-b45a433fc380
         minimumSize: {x: 150, y: 150}
         tabLabel: Orange Tab
         tabIcon: {fileID: 0}
     anchorDirection: 0
+    initialSize: {x: 0, y: 0}
     childCount: 0
     indexOfFirstChild: 3
 --- !u!114 &647658037
@@ -1036,7 +1051,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0.5}
   m_AnchorMax: {x: 0, y: 0.5}
-  m_AnchoredPosition: {x: 685.31537, y: 18.85}
+  m_AnchoredPosition: {x: 685.31384, y: 18.85}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0, y: 0.5}
 --- !u!114 &2038115446

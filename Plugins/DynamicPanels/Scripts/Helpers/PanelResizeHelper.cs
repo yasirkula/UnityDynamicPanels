@@ -15,7 +15,7 @@ namespace DynamicPanels
 		private Direction secondDirection;
 
 		private PanelResizeHelper helperBefore, helperAfter;
-		
+
 		private int pointerId = PanelManager.NON_EXISTING_TOUCH;
 
 		private void Awake()

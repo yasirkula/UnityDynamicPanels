@@ -21,7 +21,7 @@ namespace DynamicPanels
 		protected void Awake()
 		{
 			RectTransform = (RectTransform) transform;
-			
+
 			raycastZone = gameObject.AddComponent<Image>();
 			raycastZone.color = Color.clear;
 		}
@@ -39,7 +39,7 @@ namespace DynamicPanels
 			m_panel = panel;
 			raycastZone.sprite = panel.Internal.BackgroundSprite;
 		}
-		
+
 		public void SetActive( bool value )
 		{
 			hoveredPointerId = PanelManager.NON_EXISTING_TOUCH;

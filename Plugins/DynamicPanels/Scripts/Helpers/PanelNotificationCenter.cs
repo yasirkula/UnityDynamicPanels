@@ -52,6 +52,19 @@ namespace DynamicPanels
 				}
 			}
 
+			public static void TabIDChanged( PanelTab tab, string previousID, string newID )
+			{
+				if( !string.IsNullOrEmpty( previousID ) )
+				{
+					PanelTab previousTab;
+					if( idToTab.TryGetValue( previousID, out previousTab ) && previousTab == tab )
+						idToTab.Remove( previousID );
+				}
+
+				if( !string.IsNullOrEmpty( newID ) )
+					idToTab[newID] = tab;
+			}
+
 			private static bool IsPanelRegistered( Panel panel )
 			{
 				for( int i = panels.Count - 1; i >= 0; i-- )
@@ -63,12 +76,14 @@ namespace DynamicPanels
 				return false;
 			}
 		}
-		
+
 		public delegate void PanelDelegate( Panel panel );
 		public static event PanelDelegate OnPanelCreated, OnPanelDestroyed, OnPanelBecameActive, OnPanelBecameInactive;
 
 		private static readonly List<Panel> panels = new List<Panel>( 32 );
 		public static int NumberOfPanels { get { return panels.Count; } }
+
+		private static readonly Dictionary<string, PanelTab> idToTab = new Dictionary<string, PanelTab>( 32 );
 
 		public static Panel GetPanel( int panelIndex )
 		{
@@ -76,6 +91,17 @@ namespace DynamicPanels
 				return panels[panelIndex];
 
 			return null;
+		}
+
+		public static bool TryGetTab( string tabID, out PanelTab tab )
+		{
+			if( string.IsNullOrEmpty( tabID ) )
+			{
+				tab = null;
+				return false;
+			}
+
+			return idToTab.TryGetValue( tabID, out tab );
 		}
 	}
 }

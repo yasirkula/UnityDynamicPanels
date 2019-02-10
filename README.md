@@ -29,7 +29,7 @@ There are two ways to create panels: by using the GUI of Dynamic Panels Canvas o
 
 ![dynamic_panels_canvas](Images/4.png)
 
-To add a new free panel using the Dynamic Panels Canvas component, simply click the **Add New** button under the *Free Panels* section. Then, click the + button to start adding tabs to that panel. Each tab has 4 properties: the content (*RectTransform*) that will be displayed while the tab is active, a label, an optional icon, and the minimum size of the content associated to the tab. To remove a free panel, select a tab inside the panel and click the **Remove Selected** button.
+To add a new free panel using the Dynamic Panels Canvas component, simply click the **Add New** button under the *Free Panels* section. Then, click the + button to start adding tabs to that panel. Each tab has 4 properties: the content (*RectTransform*) that will be displayed while the tab is active, a label, an optional icon, and the minimum size of the content associated with the tab. To remove a free panel, select a tab inside the panel and click the **Remove Selected** button.
 
 You can create docked panels by using the buttons under the *Docked Panels* section. To create a panel that is docked to the edge of the Dynamic Panels Canvas, use the buttons next to "*Dock new panel to canvas:*". You can click a panel inside the preview zone (immediately under the *Docked Panels* section) and edit its tabs. You can also dock a panel to the selected panel using the buttons next to "*Dock new panel inside:*".
 
@@ -37,10 +37,12 @@ When you are done, click the Play button to see the magic happen!
 
 There are a couple of settings in Dynamic Panels Canvas that you may want to play with:
 
-- **Minimum Free Space**: if its value is zero, docked panels can fill the whole Dynamic Panels Canvas. Otherwise, there will always be some free space that docked panels can't expand to
+- **Leave Free Space**: when enabled, there will always be some free space in the canvas that docked panels can't fill. Otherwise, docked panels will fill the whole canvas
+- **Minimum Free Space**: if *Leave Free Space* is enabled, this value will determine the minimum free space
 - **Panel Resizable Area Length**: the length of the invisible area at each side of a panel that allows users to resize a panel
 - **Canvas Anchor Zone Length**: the length of the dockable area of the Dynamic Panels Canvas. When a tab is dragged and dropped onto that area, it will be docked to the edge of the Dynamic Panels Canvas
 - **Panel Anchor Zone Length**: the length of the dockable area inside a panel. When a tab is dragged and dropped onto that area, it will be docked to the panel. This area is enabled only for docked panels (you can't dock panels to free panels)
+- **Initial Size**: (*docked panels only*) determines the initial size of a docked panel. This is achieved by programmatically resizing the panel after it is created, so this operation may affect the adjacent panels' sizes, as well. This value won't have any effect if left as (0,0)
 
 **NOTE:** if you change the *Resources/DynamicPanel.prefab*, also make sure that the Panel's *Header Height* property is equal to the distance between the top of the panel and the bottom of the *PanelHeader* child object (which holds the tabs runtime).
 
@@ -50,7 +52,9 @@ Before using the scripting API, import **DynamicPanels** namespace to your scrip
 
 ### PanelUtils
 
-`static Panel PanelUtils.CreatePanelFor( RectTransform content, DynamicPanelsCanvas canvas )`: creates and returns a panel with a tab that is associated with the *content*. The panel is created inside the specified Dynamic Panels Canvas. If the content is already part of a panel, then the existing panel is returned
+`static Panel CreatePanelFor( RectTransform content, DynamicPanelsCanvas canvas )`: creates and returns a panel with a tab that is associated with the *content*. The panel is created inside the specified Dynamic Panels Canvas. If the content is already part of a panel, then the existing panel is returned
+
+`static PanelTab GetAssociatedTab( RectTransform content )`: if *content* is associated with a tab, returns it; otherwise returns *null*
 
 ### Panel
 
@@ -64,27 +68,33 @@ Before using the scripting API, import **DynamicPanels** namespace to your scrip
 
 `Vector2 MinSize { get; }`: returns the minimum size of the panel. This value is calculated runtime using the minimum size values of the panel's tab(s)
 
-`int NumberOfTabs { get; }`: returns the number of tabs on that panel
+`int NumberOfTabs { get; }`: returns the number of tabs on the panel
 
 `int ActiveTab { get; set; }`: returns the index of the currently selected tab. Its value can be changed, as well
 
+`PanelTab this[int tabIndex] { get; }`: returns the tab at the specified index
+
 `bool IsDocked { get; } }`: returns whether the panel is a docked panel or a free panel
 
-`int AddTab( RectTransform tabContent, int tabIndex = -1 )`: if *tabContent* is already associated to an existing tab, then moves that tab to this panel. Otherwise, creates a new tab and associates it with *tabContent*. If **tabIndex** is not specified, then the tab will be inserted to the end of the tabs list. Be aware that a newly created tab will have a default label/icon/minimum size and it is highly recommended to customize these values using the functions mentioned below
+`PanelTab AddTab( RectTransform tabContent, int tabIndex = -1 )`: adds a new tab to the panel and sets *tabContent* as its content. If *tabIndex* is not specified, then the tab will be inserted to the end of the tabs list. Be aware that a newly created tab will have a default label/icon/minimum size and it is highly recommended to customize these values afterwards
 
-`void RemoveTab( int tabIndex )`: removes a tab from the panel. Be careful when calling this function because the content associated to the tab will also be destroyed!
+`PanelTab AddTab( PanelTab tab, int tabIndex = -1 )`: moves the specified tab to this panel
 
-`void SetTabTitle( int tabIndex, Sprite icon, string label )`: sets the label and the icon of a tab
+`PanelTab AddTab( string tabID, int tabIndex = -1 )`: same as above
 
-`void SetTabMinSize( int tabIndex, Vector2 minSize )`: sets the minimum size of the content associated to a tab
+`void RemoveTab( int tabIndex )`: removes a tab from the panel. Be careful when calling this function because the content associated with the tab will also be destroyed!
+
+`void RemoveTab( PanelTab tab )`: same as above
+
+`void RemoveTab( string tabID )`: same as above
 
 `int GetTabIndex( RectTransform tabContent )`: returns the index of a tab, or -1 if the tab is not part of the panel
 
-`RectTransform GetTabContent( int tabIndex )`: returns the content associated to a tab
+`int GetTabIndex( PanelTab tab )`: same as above
 
-`Sprite GetTabIcon( int tabIndex )`: returns the icon of a tab
+`int GetTabIndex( string tabID )`: same as above
 
-`string GetTabLabel( int tabIndex )`: returns the label of a tab
+`PanelTab GetTab( RectTransform tabContent )`: returns the tab that is associated with *tabContent*, or *null* if it is not a part of the panel
 
 `void DockToRoot( Direction direction )`: docks the panel to an edge of the Dynamic Panels Canvas
 
@@ -94,13 +104,35 @@ Before using the scripting API, import **DynamicPanels** namespace to your scrip
 
 `Panel DetachTab( int tabIndex )`: detaches a tab from the panel, creates a new panel with it and returns the new panel. If the tab is the only tab on the panel, then the panel itself is detached and returned
 
+`Panel DetachTab( PanelTab tab )`: same as above
+
 `void BringForward()`: if the panel is free, brings it forwards so that it is drawn above all other panels
 
 `void MoveTo( Vector2 screenPoint )`: moves the panel to the specified point on the screen (panel's center will be aligned to the point)
 
-`void ResizeTo( Vector2 newSize )`: resizes the panel. If it is docked, then this change may affect other panels that this panel is docked to, as well
+`void ResizeTo( Vector2 newSize )`: resizes the panel. If it is docked, then this change may affect the adjacent panels, as well
 
 `IPanelGroupElement GetSurroundingElement( Direction direction )`: if the panel is docked and if there is a panel/panel group in its specified vicinity, returns it
+
+### PanelTab
+
+`string ID { get; set; }`: a unique identifier for this tab. It is mainly used in the serialization system but it can also be used to quickly access the tab (see *PanelNotificationCenter.TryGetTab*). To view/change a tab's ID from the Inspector, right click the DynamicPanelsCanvas component and select "*Toggle Show IDs*"
+
+`Panel Panel { get; }`: returns the panel that the tab belongs to
+
+`int Index { get; set; }`: returns the index of the tab among all tabs on the panel. Its value can be changed
+
+`RectTransform Content { get; }`: returns the content (RectTransform) that is associated with the tab
+
+`Vector2 MinSize { get; set; }`: gets or sets the minimum size of the content
+
+`Sprite Icon { get; set; }`: gets or sets the icon of the tab
+
+`string Label { get; set; }`: gets or sets the label of the tab
+
+`void AttachTo( Panel panel, int tabIndex = -1 )`: same as *Panel.AddTab*
+
+`Panel Detach()`: same as *Panel.DetachTab*
 
 ### PanelGroup
 
@@ -132,7 +164,7 @@ Panel groups are used to hold docked panels together. In a complex hierarchy, a 
 
 `void DockToPanel( IPanelGroupElement anchor, Direction direction )`: docks the panel group to another panel or panel group. It is not possible to dock a panel group to a free panel
 
-`void ResizeTo( Vector2 newSize )`: resizes the panel group. This change affects the panels inside and may affect other panels that this panel group is docked to. Make sure to dock the panel group to an element in the layout before calling this function
+`void ResizeTo( Vector2 newSize )`: resizes the panel group. This change affects the panels inside the group and may affect the adjacent panels. Make sure to dock the panel group to an element in the layout before calling this function
 
 `bool IsInSameDirection( Direction direction )`: if this group is horizontal, returns *true* if *direction* is Left or Right. Otherwise, returns *true* if *direction* is Top or Bottom
 
@@ -142,7 +174,25 @@ Panel groups are used to hold docked panels together. In a complex hierarchy, a 
 
 ### DynamicPanelsCanvas
 
-`void ForceRebuildLayoutImmediate()`: immediately rebuilds the layout of the Dynamic Panels Canvas, if it is dirty. This process involves a couple of steps: elements in groups are validated (elements that no longer belong to that group are removed, empty child groups are deleted, etc.), minimum sizes are calculated, bounds of the elements are recalculated and so on. This step is quite processor intensive and therefore is not immediately called when e.g. a group is changed. Rather, it is called on LateUpdate to process everything in a batch (it is only called if something has changed). But this brings out an issue: if you are modifying the layout via Scripting API, you won't be able to access the correct size/position/minimum size values of layout elements (panels/panel groups), resize them in the same frame that you modify them (resizes happen instantly and do not count as modification, but the layout should be up-to-date) or iterate through the elements of a panel group correctly. To solve this issue, you can simply call this function after modifying the layout to rebuild it immediately.
+`string ID { get; set; }`: a unique identifier for this canvas. It is used in the serialization system
+
+`void ForceRebuildLayoutImmediate()`: immediately rebuilds the layout of the Dynamic Panels Canvas, if it is dirty. This process involves a couple of steps: elements in groups are validated (elements that no longer belong to that group are removed, empty child groups are deleted, etc.), minimum sizes are calculated, bounds of the elements are recalculated and so on. This step is quite processor intensive and therefore is not immediately called when e.g. a group is changed. Rather, it is called on LateUpdate to process everything in a batch (it is only called if something has changed). But this brings out an issue: if you are modifying the layout via Scripting API, you won't be able to access the correct size/position/minimum size values of layout elements (panels/panel groups), resize them in the same frame that you modify them (resizes happen instantly and do not count as modification, but the layout should be up-to-date) or iterate through the elements of a panel group correctly. To solve this issue, you can simply call this function after modifying the layout to rebuild it immediately
+
+`void SaveLayout()`: shorthand for *PanelSerialization.SerializeCanvas*
+
+`void LoadLayout()`: shorthand for *PanelSerialization.DeserializeCanvas*
+
+### PanelSerialization
+
+This helper class can save&load the layout of a dynamic canvas via binary serialization at runtime. In the serialized data, tabs are referenced by their IDs, so these IDs should remain consistent. To test serialization in Unity editor while in Play mode, right click the DynamicPanelsCanvas component and select "*Save Layout*" or "*Load Layout*".
+
+`static byte[] SerializeCanvasToArray( DynamicPanelsCanvas canvas )`: serializes the current state of the panels inside the canvas and returns the serialized data. You are responsible for storing this data in a storage
+
+`static void DeserializeCanvasFromArray( DynamicPanelsCanvas canvas, byte[] data )`: deserializes the serialized data and restores the saved state of the panels
+
+`static void SerializeCanvas( DynamicPanelsCanvas canvas )`: internally calls *SerializeCanvasToArray* and saves the data to *PlayerPrefs* (using the *ID* of the canvas as key)
+
+`static void DeserializeCanvas( DynamicPanelsCanvas canvas )`: if a saved data for the canvas exists in *PlayerPrefs*, loads it and then calls *DeserializeCanvasFromArray* internally
 
 ### PanelNotificationCenter
 
@@ -160,6 +210,8 @@ Notification center raises certain events during panels' lifecycle. It also hold
 
 `static Panel GetPanel( int panelIndex )`: returns a panel (it can be inactive)
 
+`static bool TryGetTab( string tabID, out PanelTab tab )`: checks whether or not a tab with the specified ID exists and returns it in the *tab* parameter
+
 ## EXAMPLE CODE
 
 The following example code creates 3 panels -one with 2 tabs- and generates a L-shaped layout with them. The final output can be seen in the following picture:
@@ -170,7 +222,7 @@ The following example code creates 3 panels -one with 2 tabs- and generates a L-
 using UnityEngine;
 using DynamicPanels;
 
-public class PanelCreator : MonoBehaviour 
+public class PanelCreator : MonoBehaviour
 {
 	public DynamicPanelsCanvas canvas;
 
@@ -189,18 +241,22 @@ public class PanelCreator : MonoBehaviour
 		panel1.AddTab( content4 );
 
 		// Set the labels and the (optional) icons of the tabs
-		panel1.SetTabTitle( 0, tabIcon1, tabLabel1 ); // first tab
-		panel1.SetTabTitle( 1, tabIcon4, tabLabel4 ); // second tab
+		panel1[0].Icon = tabIcon1; // first tab
+		panel1[0].Label = tabLabel1;
+		panel1[1].Icon = tabIcon4; // second tab
+		panel1[1].Label = tabLabel4;
 
-		panel2.SetTabTitle( 0, tabIcon2, tabLabel2 );
-		panel3.SetTabTitle( 0, tabIcon3, tabLabel3 );
+		panel2[0].Icon = tabIcon2;
+		panel2[0].Label = tabLabel2;
+		panel3[0].Icon = tabIcon3;
+		panel3[0].Label = tabLabel3;
 
-		// Set the minimum sizes of the contents associated to the tabs
-		panel1.SetTabMinSize( 0, new Vector2( 300f, 300f ) ); // first tab
-		panel1.SetTabMinSize( 1, new Vector2( 300f, 300f ) ); // second tab
+		// Set the minimum sizes of the contents associated with the tabs
+		panel1[0].MinSize = new Vector2( 300f, 300f ); // first tab
+		panel1[1].MinSize = new Vector2( 300f, 300f ); // second tab
 
-		panel2.SetTabMinSize( 0, new Vector2( 300f, 300f ) );
-		panel3.SetTabMinSize( 0, new Vector2( 300f, 300f ) );
+		panel2[0].MinSize = new Vector2( 300f, 300f );
+		panel3[0].MinSize = new Vector2( 300f, 300f );
 
 		// Create a vertical panel group
 		PanelGroup groupLeftVertical = new PanelGroup( canvas, Direction.Top ); // elements are always arranged from bottom to top
@@ -211,7 +267,7 @@ public class PanelCreator : MonoBehaviour
 		panel3.DockToRoot( Direction.Bottom );
 		groupLeftVertical.DockToRoot( Direction.Left );
 
-		// Rebuild the layout before attempting to resize elements or read their sizes/minimum sizes correctly
+		// Rebuild the layout before attempting to resize elements or read their correct sizes/minimum sizes
 		canvas.ForceRebuildLayoutImmediate();
 
 		// It is recommended to manually resize layout elements that are created by code and docked.

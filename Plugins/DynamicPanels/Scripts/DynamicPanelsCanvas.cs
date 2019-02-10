@@ -22,12 +22,14 @@ namespace DynamicPanels
 					return;
 #endif
 
-				if( canvas.UnityCanvas.renderMode == RenderMode.ScreenSpaceOverlay || 
+				if( canvas.UnityCanvas.renderMode == RenderMode.ScreenSpaceOverlay ||
 					( canvas.UnityCanvas.renderMode == RenderMode.ScreenSpaceCamera && canvas.UnityCanvas.worldCamera == null ) )
 					worldCamera = null;
 				else
 					worldCamera = canvas.UnityCanvas.worldCamera ?? Camera.main;
 			}
+
+			public Panel DummyPanel { get { return canvas.dummyPanel; } }
 
 			public List<PanelProperties> InitialPanelsUnanchored
 			{
@@ -66,6 +68,7 @@ namespace DynamicPanels
 		{
 			public PanelProperties panel = new PanelProperties();
 			public Direction anchorDirection;
+			public Vector2 initialSize;
 
 			public List<AnchoredPanelProperties> subPanels = new List<AnchoredPanelProperties>();
 		}
@@ -76,19 +79,31 @@ namespace DynamicPanels
 		{
 			public PanelProperties panel;
 			public Direction anchorDirection;
+			public Vector2 initialSize;
 
 			public int childCount;
 			public int indexOfFirstChild;
 		}
 
 		[System.Serializable]
-		public class PanelTabProperties
+		public class PanelTabProperties : ISerializationCallbackReceiver
 		{
 			public RectTransform content = null;
+			public string id = null;
 			public Vector2 minimumSize = new Vector2( 250f, 300f );
 
 			public string tabLabel = "Panel";
 			public Sprite tabIcon = null;
+
+			void ISerializationCallbackReceiver.OnBeforeSerialize()
+			{
+				if( string.IsNullOrEmpty( id ) )
+					id = System.Guid.NewGuid().ToString();
+			}
+
+			void ISerializationCallbackReceiver.OnAfterDeserialize()
+			{
+			}
 		}
 
 		public RectTransform RectTransform { get; private set; }
@@ -110,9 +125,18 @@ namespace DynamicPanels
 		public InternalSettings Internal { get; private set; }
 #endif
 
+		[SerializeField]
+		[HideInInspector]
+		private string m_id;
+		public string ID
+		{
+			get { return m_id; }
+			set { m_id = value; }
+		}
+
 		public UnanchoredPanelGroup UnanchoredPanelGroup { get; private set; }
 		public PanelGroup RootPanelGroup { get; private set; }
-		
+
 		public Vector2 Size { get; private set; }
 
 		private Panel dummyPanel;
@@ -122,8 +146,29 @@ namespace DynamicPanels
 		private readonly CanvasAnchorZone[] anchorZones = new CanvasAnchorZone[4]; // one for each side
 
 		[SerializeField]
+		private bool m_leaveFreeSpace = true;
+		public bool LeaveFreeSpace
+		{
+			get { return m_leaveFreeSpace; }
+			set
+			{
+				m_leaveFreeSpace = value;
+				if( !m_leaveFreeSpace )
+					dummyPanel.Detach();
+				else if( !dummyPanel.IsDocked )
+				{
+					// Add the free space to the middle
+					if( RootPanelGroup.Count <= 1 )
+						RootPanelGroup.AddElement( dummyPanel );
+					else
+						RootPanelGroup.AddElementBefore( RootPanelGroup[RootPanelGroup.Count / 2], dummyPanel );
+				}
+			}
+		}
+
+		[SerializeField]
 		private Vector2 minimumFreeSpace = new Vector2( 50f, 50f );
-		
+
 		[SerializeField]
 		private float m_panelResizableAreaLength = 12f;
 		public float PanelResizableAreaLength { get { return m_panelResizableAreaLength; } }
@@ -135,18 +180,18 @@ namespace DynamicPanels
 		[SerializeField]
 		private float m_panelAnchorZoneLength = 100f;
 		public float PanelAnchorZoneLength { get { return m_panelAnchorZoneLength; } }
-		
+
 		private const float m_panelAnchorZoneLengthRatio = 0.31f;
 		public float PanelAnchorZoneLengthRatio { get { return m_panelAnchorZoneLengthRatio; } }
 
 		[SerializeField]
 		private List<PanelProperties> initialPanelsUnanchored;
-		
+
 		[SerializeField]
 		[HideInInspector]
 		private List<SerializableAnchoredPanelProperties> initialPanelsAnchoredSerialized;
 		private AnchoredPanelProperties initialPanelsAnchored;
-		
+
 		private bool updateBounds = true;
 		private bool isDirty = false;
 
@@ -162,7 +207,7 @@ namespace DynamicPanels
 
 			UnanchoredPanelGroup = new UnanchoredPanelGroup( this );
 			RectTransform.pivot = new Vector2( 0.5f, 0.5f );
-			
+
 			if( GetComponent<RectMask2D>() == null )
 				gameObject.AddComponent<RectMask2D>();
 
@@ -195,22 +240,36 @@ namespace DynamicPanels
 				tr = tr.parent;
 			}
 
+			Dictionary<Panel, Vector2> initialSizes = null;
 			if( initialPanelsAnchored != null )
-				CreateAnchoredPanelsRecursively( initialPanelsAnchored.subPanels, dummyPanel, createdTabs );
+			{
+				initialSizes = new Dictionary<Panel, Vector2>( initialPanelsAnchoredSerialized.Count );
+				CreateAnchoredPanelsRecursively( initialPanelsAnchored.subPanels, dummyPanel, createdTabs, initialSizes );
+			}
 
 			for( int i = 0; i < initialPanelsUnanchored.Count; i++ )
 				CreateInitialPanel( initialPanelsUnanchored[i], null, Direction.None, createdTabs );
-			
+
 			initialPanelsUnanchored = null;
 			initialPanelsAnchored = null;
 			initialPanelsAnchoredSerialized = null;
 
-			LateUpdate(); // update layout
+			LeaveFreeSpace = m_leaveFreeSpace;
+			LateUpdate(); // Update layout
 
-			RootPanelGroup.Internal.TryChangeSizeOf( dummyPanel, Direction.Left, 20009f ); // Minimize all panels to their minimum size
-			RootPanelGroup.Internal.TryChangeSizeOf( dummyPanel, Direction.Top, 20009f ); // Magick number..
-			RootPanelGroup.Internal.TryChangeSizeOf( dummyPanel, Direction.Right, 20009f ); // or not?
-			RootPanelGroup.Internal.TryChangeSizeOf( dummyPanel, Direction.Bottom, 20009f ); // only time will tell _/o_o\_
+			if( m_leaveFreeSpace )
+			{
+				// Minimize all panels to their minimum size
+				dummyPanel.ResizeTo( new Vector2( 99999f, 99999f ) );
+
+				//RootPanelGroup.Internal.TryChangeSizeOf( dummyPanel, Direction.Left, 20009f );
+				//RootPanelGroup.Internal.TryChangeSizeOf( dummyPanel, Direction.Top, 20009f ); // Magick number..
+				//RootPanelGroup.Internal.TryChangeSizeOf( dummyPanel, Direction.Right, 20009f ); // or not?
+				//RootPanelGroup.Internal.TryChangeSizeOf( dummyPanel, Direction.Bottom, 20009f ); // A: just a big random number U_U
+			}
+
+			if( initialSizes != null )
+				ResizeAnchoredPanelsRecursively( RootPanelGroup, initialSizes );
 		}
 
 		private void OnDestroy()
@@ -262,7 +321,7 @@ namespace DynamicPanels
 			LateUpdate();
 		}
 
-		public void OnPointerEnter( PointerEventData eventData )
+		void IPointerEnterHandler.OnPointerEnter( PointerEventData eventData )
 		{
 			PanelManager.Instance.OnPointerEnteredCanvas( this, eventData );
 		}
@@ -271,7 +330,7 @@ namespace DynamicPanels
 		{
 			updateBounds = true;
 		}
-		
+
 		private void UpdateBounds()
 		{
 			Size = RectTransform.rect.size;
@@ -280,7 +339,7 @@ namespace DynamicPanels
 			UnanchoredPanelGroup.Internal.UpdateBounds( Vector2.zero, Size );
 		}
 
-		private void CreateAnchoredPanelsRecursively( List<AnchoredPanelProperties> anchoredPanels, Panel rootPanel, HashSet<Transform> createdTabs )
+		private void CreateAnchoredPanelsRecursively( List<AnchoredPanelProperties> anchoredPanels, Panel rootPanel, HashSet<Transform> createdTabs, Dictionary<Panel, Vector2> initialSizes )
 		{
 			if( anchoredPanels == null )
 				return;
@@ -290,8 +349,30 @@ namespace DynamicPanels
 				Panel panel = CreateInitialPanel( anchoredPanels[i].panel, rootPanel, anchoredPanels[i].anchorDirection, createdTabs );
 				if( panel == null )
 					panel = rootPanel;
+				else if( anchoredPanels[i].initialSize != Vector2.zero )
+					initialSizes[panel] = anchoredPanels[i].initialSize;
 
-				CreateAnchoredPanelsRecursively( anchoredPanels[i].subPanels, panel, createdTabs );
+				CreateAnchoredPanelsRecursively( anchoredPanels[i].subPanels, panel, createdTabs, initialSizes );
+			}
+		}
+
+		private void ResizeAnchoredPanelsRecursively( PanelGroup group, Dictionary<Panel, Vector2> initialSizes )
+		{
+			if( group == null )
+				return;
+
+			int count = group.Count;
+			for( int i = 0; i < count; i++ )
+			{
+				Panel panel = group[i] as Panel;
+				if( panel != null )
+				{
+					Vector2 initialSize;
+					if( initialSizes.TryGetValue( panel, out initialSize ) )
+						panel.ResizeTo( initialSize, Direction.Right, Direction.Top );
+				}
+				else
+					ResizeAnchoredPanelsRecursively( group[i] as PanelGroup, initialSizes );
 			}
 		}
 
@@ -309,14 +390,19 @@ namespace DynamicPanels
 					if( panelProps.content.parent != RectTransform )
 						panelProps.content.SetParent( RectTransform, false );
 
-					int tabIndex = 0;
+					PanelTab tab;
 					if( panel == null )
+					{
 						panel = PanelUtils.CreatePanelFor( panelProps.content, this );
+						tab = panel[0];
+					}
 					else
-						tabIndex = panel.AddTab( panelProps.content );
-					
-					panel.SetTabTitle( tabIndex, panelProps.tabIcon, panelProps.tabLabel );
-					panel.SetTabMinSize( tabIndex, panelProps.minimumSize );
+						tab = panel.AddTab( panelProps.content );
+
+					tab.Icon = panelProps.tabIcon;
+					tab.Label = panelProps.tabLabel;
+					tab.MinSize = panelProps.minimumSize;
+					tab.ID = panelProps.id;
 
 					createdTabs.Add( panelProps.content );
 				}
@@ -390,7 +476,19 @@ namespace DynamicPanels
 				anchorZones[i].SetActive( value );
 		}
 
-		public void OnBeforeSerialize()
+		[ContextMenu( "Save Layout" )]
+		public void SaveLayout()
+		{
+			PanelSerialization.SerializeCanvas( this );
+		}
+
+		[ContextMenu( "Load Layout" )]
+		public void LoadLayout()
+		{
+			PanelSerialization.DeserializeCanvas( this );
+		}
+
+		void ISerializationCallbackReceiver.OnBeforeSerialize()
 		{
 			if( initialPanelsAnchoredSerialized == null )
 				initialPanelsAnchoredSerialized = new List<SerializableAnchoredPanelProperties>();
@@ -400,10 +498,13 @@ namespace DynamicPanels
 			if( initialPanelsAnchored == null )
 				initialPanelsAnchored = new AnchoredPanelProperties();
 
+			if( string.IsNullOrEmpty( m_id ) )
+				m_id = System.Guid.NewGuid().ToString();
+
 			AddToSerializedAnchoredPanelProperties( initialPanelsAnchored );
 		}
 
-		public void OnAfterDeserialize()
+		void ISerializationCallbackReceiver.OnAfterDeserialize()
 		{
 			if( initialPanelsAnchoredSerialized != null && initialPanelsAnchoredSerialized.Count > 0 )
 				ReadFromSerializedAnchoredPanelProperties( 0, out initialPanelsAnchored );
@@ -417,6 +518,7 @@ namespace DynamicPanels
 			{
 				panel = props.panel,
 				anchorDirection = props.anchorDirection,
+				initialSize = props.initialSize,
 				childCount = props.subPanels.Count,
 				indexOfFirstChild = initialPanelsAnchoredSerialized.Count + 1
 			};
@@ -433,9 +535,10 @@ namespace DynamicPanels
 			{
 				panel = serializedProps.panel,
 				anchorDirection = serializedProps.anchorDirection,
+				initialSize = serializedProps.initialSize,
 				subPanels = new List<AnchoredPanelProperties>()
 			};
-			
+
 			for( int i = 0; i != serializedProps.childCount; i++ )
 			{
 				AnchoredPanelProperties childProps;
