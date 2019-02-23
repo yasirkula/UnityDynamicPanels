@@ -83,7 +83,7 @@ namespace DynamicPanels
 				Vector2 pointerPos = activeEventData.position;
 				if( pointerPos != prevPointerPos )
 				{
-					if( PanelManager.Instance.IsDraggingPanel )
+					if( activeEventData.dragging )
 						SetDefaultCursor();
 					else
 					{
