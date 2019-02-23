@@ -187,7 +187,6 @@ namespace DynamicPanels
 			public void AnchorZonesSetActive( bool value ) { panel.AnchorZonesSetActive( value ); }
 			public void OnResize( Direction direction, Vector2 screenPoint ) { panel.OnResize( direction, screenPoint ); }
 			public void OnTranslate( Vector2 deltaPosition ) { panel.OnTranslate( deltaPosition ); }
-			public bool CanResizeInDirection( Direction direction ) { return panel.CanResizeInDirection( direction ); }
 			public void OnApplicationQuit() { panel.OnApplicationQuit(); }
 		}
 
@@ -701,7 +700,7 @@ namespace DynamicPanels
 				headerAnchorZone.SetActive( value );
 		}
 
-		private bool CanResizeInDirection( Direction direction )
+		public bool CanResizeInDirection( Direction direction )
 		{
 			if( direction == Direction.None )
 				return false;

@@ -28,6 +28,8 @@ namespace DynamicPanels
 		private List<Panel> panels = new List<Panel>( 32 );
 
 		private Panel draggedPanel = null;
+		public bool IsDraggingPanel { get { return draggedPanel != null; } }
+
 		private AnchorZoneBase hoveredAnchorZone = null;
 
 		private RectTransform previewPanel = null;

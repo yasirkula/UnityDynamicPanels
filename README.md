@@ -46,6 +46,14 @@ There are a couple of settings in Dynamic Panels Canvas that you may want to pla
 
 **NOTE:** if you change the *Resources/DynamicPanel.prefab*, also make sure that the Panel's *Header Height* property is equal to the distance between the top of the panel and the bottom of the *PanelHeader* child object (which holds the tabs runtime).
 
+### PanelCursorHandler
+
+Adding this component to a GameObject will make the cursor dynamic i.e. its texture will change when it enters a panel's resizable area.
+
+![dynamic_panels_canvas](Images/4_1.png)
+
+Note that this component won't have any effect on Android and iOS.
+
 ## SCRIPTING API
 
 Before using the scripting API, import **DynamicPanels** namespace to your script(s): `using DynamicPanels;`
@@ -111,6 +119,8 @@ Before using the scripting API, import **DynamicPanels** namespace to your scrip
 `void MoveTo( Vector2 screenPoint )`: moves the panel to the specified point on the screen (panel's center will be aligned to the point)
 
 `void ResizeTo( Vector2 newSize )`: resizes the panel. If it is docked, then this change may affect the adjacent panels, as well
+
+`bool CanResizeInDirection( Direction direction )`: returns whether or not the panel can be resized in the specified direction
 
 `IPanelGroupElement GetSurroundingElement( Direction direction )`: if the panel is docked and if there is a panel/panel group in its specified vicinity, returns it
 
