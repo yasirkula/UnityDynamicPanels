@@ -198,6 +198,7 @@ namespace DynamicPanels
 
 		public InternalSettings Internal { get; private set; }
 
+#pragma warning disable 0649
 		[SerializeField]
 		private PanelHeader header;
 
@@ -207,6 +208,7 @@ namespace DynamicPanels
 
 		[SerializeField]
 		private RectTransform contentParent;
+#pragma warning restore 0649
 
 		private RectTransform resizeZonesParent;
 		private readonly PanelResizeHelper[] resizeZones = new PanelResizeHelper[4]; // one for each side
@@ -216,6 +218,7 @@ namespace DynamicPanels
 		private PanelAnchorZone panelAnchorZone;
 		private PanelHeaderAnchorZone headerAnchorZone;
 
+#pragma warning disable 0649
 		[SerializeField]
 		private float headerHeight = 50f;
 
@@ -230,6 +233,7 @@ namespace DynamicPanels
 		[SerializeField]
 		private Color m_tabDetachingColor;
 		public Color TabDetachingColor { get { return m_tabDetachingColor; } }
+#pragma warning restore 0649
 
 		public Vector2 Position { get { return RectTransform.anchoredPosition; } }
 		public Vector2 Size { get { return RectTransform.sizeDelta; } }

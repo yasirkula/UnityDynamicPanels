@@ -13,6 +13,7 @@ namespace DynamicPanels
 		private bool isResizing;
 		private Vector2 prevPointerPos;
 
+#pragma warning disable 0649
 		[SerializeField]
 		private Texture2D horizontalCursor;
 		[SerializeField]
@@ -21,6 +22,7 @@ namespace DynamicPanels
 		private Texture2D diagonalCursorTopLeft;
 		[SerializeField]
 		private Texture2D diagonalCursorTopRight;
+#pragma warning restore 0649
 
 		private void Awake()
 		{

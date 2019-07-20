@@ -6,9 +6,11 @@ namespace DynamicPanels
 	[DisallowMultipleComponent]
 	public class PanelHeader : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler
 	{
+#pragma warning disable 0649
 		[SerializeField]
 		private Panel m_panel;
 		public Panel Panel { get { return m_panel; } }
+#pragma warning restore 0649
 
 		private int pointerId = PanelManager.NON_EXISTING_TOUCH;
 

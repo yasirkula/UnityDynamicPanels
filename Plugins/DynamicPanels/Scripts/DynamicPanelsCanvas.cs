@@ -145,6 +145,7 @@ namespace DynamicPanels
 		private RectTransform anchorZonesParent;
 		private readonly CanvasAnchorZone[] anchorZones = new CanvasAnchorZone[4]; // one for each side
 
+#pragma warning disable 0649
 		[SerializeField]
 		private bool m_leaveFreeSpace = true;
 		public bool LeaveFreeSpace
@@ -191,6 +192,7 @@ namespace DynamicPanels
 		[HideInInspector]
 		private List<SerializableAnchoredPanelProperties> initialPanelsAnchoredSerialized;
 		private AnchoredPanelProperties initialPanelsAnchored;
+#pragma warning restore 0649
 
 		private bool updateBounds = true;
 		private bool isDirty = false;
