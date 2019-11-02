@@ -18,15 +18,15 @@ namespace DynamicPanels
 				this.canvas = canvas;
 
 #if UNITY_EDITOR
-				if( canvas.UnityCanvas == null ) // is null while inspecting this component in edit mode
+				if( !canvas.UnityCanvas ) // is null while inspecting this component in edit mode
 					return;
 #endif
 
 				if( canvas.UnityCanvas.renderMode == RenderMode.ScreenSpaceOverlay ||
-					( canvas.UnityCanvas.renderMode == RenderMode.ScreenSpaceCamera && canvas.UnityCanvas.worldCamera == null ) )
+					( canvas.UnityCanvas.renderMode == RenderMode.ScreenSpaceCamera && !canvas.UnityCanvas.worldCamera ) )
 					worldCamera = null;
 				else
-					worldCamera = canvas.UnityCanvas.worldCamera ?? Camera.main;
+					worldCamera = canvas.UnityCanvas.worldCamera ? canvas.UnityCanvas.worldCamera : Camera.main;
 			}
 
 			public Panel DummyPanel { get { return canvas.dummyPanel; } }
@@ -140,7 +140,7 @@ namespace DynamicPanels
 		public Vector2 Size { get; private set; }
 
 		private Panel dummyPanel;
-		private Image background;
+		private Graphic background;
 
 		private RectTransform anchorZonesParent;
 		private readonly CanvasAnchorZone[] anchorZones = new CanvasAnchorZone[4]; // one for each side
@@ -208,9 +208,9 @@ namespace DynamicPanels
 #endif
 
 			UnanchoredPanelGroup = new UnanchoredPanelGroup( this );
-			RectTransform.pivot = new Vector2( 0.5f, 0.5f );
+			RectTransform.ChangePivotWithoutAffectingPosition( new Vector2( 0.5f, 0.5f ) );
 
-			if( GetComponent<RectMask2D>() == null )
+			if( !GetComponent<RectMask2D>() )
 				gameObject.AddComponent<RectMask2D>();
 
 			Size = RectTransform.rect.size;
@@ -218,12 +218,10 @@ namespace DynamicPanels
 			InitializeRootGroup();
 			InitializeAnchorZones();
 
-			background = GetComponent<Image>();
-			if( background == null )
+			background = GetComponent<Graphic>();
+			if( !background )
 			{
-				background = gameObject.AddComponent<Image>();
-				background.sprite = dummyPanel.Internal.BackgroundSprite;
-				background.color = Color.clear;
+				background = gameObject.AddComponent<NonDrawingGraphic>();
 				background.raycastTarget = false;
 			}
 
@@ -236,7 +234,7 @@ namespace DynamicPanels
 
 			HashSet<Transform> createdTabs = new HashSet<Transform>(); // A set to prevent duplicate tabs or to prevent making canvas itself a panel
 			Transform tr = transform;
-			while( tr != null )
+			while( tr )
 			{
 				createdTabs.Add( tr );
 				tr = tr.parent;
@@ -384,7 +382,7 @@ namespace DynamicPanels
 			for( int i = 0; i < properties.tabs.Count; i++ )
 			{
 				PanelTabProperties panelProps = properties.tabs[i];
-				if( panelProps.content != null && !panelProps.content.Equals( null ) )
+				if( panelProps.content )
 				{
 					if( createdTabs.Contains( panelProps.content ) )
 						continue;

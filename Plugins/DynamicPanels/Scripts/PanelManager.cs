@@ -354,7 +354,7 @@ namespace DynamicPanels
 						{
 							previewPanelCanvas = canvas;
 
-							if( hoveredAnchorZone != null && !hoveredAnchorZone.Equals( null ) && hoveredAnchorZone.Panel.Canvas != canvas )
+							if( hoveredAnchorZone && hoveredAnchorZone.Panel.Canvas != canvas )
 								hoveredAnchorZone.OnPointerExit( pointer );
 
 							previewPanel.SetParent( canvas.RectTransform, false );

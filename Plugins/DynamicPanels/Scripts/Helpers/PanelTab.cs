@@ -151,7 +151,7 @@ namespace DynamicPanels
 
 		private void SetActive( bool activeState )
 		{
-			if( Content == null || Content.Equals( null ) )
+			if( !Content )
 				m_panel.Internal.RemoveTab( m_panel.GetTabIndex( this ), true );
 			else
 			{
@@ -166,7 +166,7 @@ namespace DynamicPanels
 
 		void IPointerClickHandler.OnPointerClick( PointerEventData eventData )
 		{
-			if( Content == null || Content.Equals( null ) )
+			if( !Content )
 				m_panel.Internal.RemoveTab( m_panel.GetTabIndex( this ), true );
 			else
 				m_panel.ActiveTab = m_panel.GetTabIndex( this );

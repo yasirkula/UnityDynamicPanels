@@ -17,7 +17,7 @@ namespace DynamicPanels
 					if( canvas == null )
 					{
 						canvas = Object.FindObjectOfType<DynamicPanelsCanvas>();
-						if( canvas == null || canvas.Equals( null ) )
+						if( !canvas )
 						{
 							Debug.LogError( "Panels require a DynamicPanelsCanvas!" );
 							return null;
@@ -59,7 +59,7 @@ namespace DynamicPanels
 
 		public static Panel CreatePanelFor( RectTransform content, DynamicPanelsCanvas canvas )
 		{
-			if( content == null || content.Equals( null ) )
+			if( !content )
 			{
 				Debug.LogError( "Content is null!" );
 				return null;
@@ -70,7 +70,7 @@ namespace DynamicPanels
 
 		public static PanelTab GetAssociatedTab( RectTransform content )
 		{
-			if( content == null || content.Equals( null ) )
+			if( !content )
 			{
 				Debug.LogError( "Content is null!" );
 				return null;
@@ -94,6 +94,37 @@ namespace DynamicPanels
 		public static bool IsNull( this IPanelGroupElement element )
 		{
 			return element == null || element.Equals( null );
+		}
+
+		// Credit: https://github.com/Unity-Technologies/UnityCsReference/blob/4fc5eb0fb2c7f5fb09f990fc99f162c8d06d9570/Editor/Mono/Inspector/RectTransformEditor.cs#L1259
+		public static void ChangePivotWithoutAffectingPosition( this RectTransform rectTransform, Vector2 pivot )
+		{
+			if( rectTransform.pivot == pivot )
+				return;
+
+			Vector3 cornerBefore;
+			Vector3[] s_Corners = new Vector3[4];
+			rectTransform.GetWorldCorners( s_Corners );
+			if( rectTransform.parent )
+				cornerBefore = rectTransform.parent.InverseTransformPoint( s_Corners[0] );
+			else
+				cornerBefore = s_Corners[0];
+
+			rectTransform.pivot = pivot;
+
+			Vector3 cornerAfter;
+			rectTransform.GetWorldCorners( s_Corners );
+			if( rectTransform.parent )
+				cornerAfter = rectTransform.parent.InverseTransformPoint( s_Corners[0] );
+			else
+				cornerAfter = s_Corners[0];
+
+			Vector3 cornerOffset = cornerAfter - cornerBefore;
+			rectTransform.anchoredPosition -= (Vector2) cornerOffset;
+
+			Vector3 pos = rectTransform.transform.position;
+			pos.z -= cornerOffset.z;
+			rectTransform.transform.position = pos;
 		}
 	}
 }

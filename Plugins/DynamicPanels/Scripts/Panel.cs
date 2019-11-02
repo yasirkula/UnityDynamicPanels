@@ -76,7 +76,7 @@ namespace DynamicPanels
 				{
 					for( int i = panel.tabs.Count - 1; i >= 0; i-- )
 					{
-						if( panel.tabs[i].Content == null || panel.tabs[i].Content.Equals( null ) || panel.tabs[i].Content.parent != panel.contentParent )
+						if( !panel.tabs[i].Content || panel.tabs[i].Content.parent != panel.contentParent )
 							RemoveTab( i, true );
 					}
 				}
@@ -289,7 +289,7 @@ namespace DynamicPanels
 			}
 			set
 			{
-				if( value != null && !value.Equals( null ) )
+				if( value )
 					AddTab( value.Content, tabIndex );
 			}
 		}
@@ -382,7 +382,7 @@ namespace DynamicPanels
 
 		public PanelTab AddTab( RectTransform tabContent, int tabIndex = -1 )
 		{
-			if( tabContent == null || tabContent.Equals( null ) )
+			if( !tabContent )
 				return null;
 
 			// Reset active tab because otherwise, it acts buggy in rare cases
@@ -398,7 +398,7 @@ namespace DynamicPanels
 			if( thisTabIndex == -1 )
 			{
 				PanelTab tab = PanelUtils.GetAssociatedTab( tabContent );
-				if( tab == null )
+				if( !tab )
 				{
 					tab = (PanelTab) Instantiate( Resources.Load<PanelTab>( "DynamicPanelTab" ), tabsParent, false );
 					tabs.Insert( tabIndex, tab );
@@ -445,7 +445,7 @@ namespace DynamicPanels
 
 		public PanelTab AddTab( PanelTab tab, int tabIndex = -1 )
 		{
-			if( tab == null || tab.Equals( null ) )
+			if( !tab )
 				return null;
 
 			return AddTab( tab.Content, tabIndex );
@@ -686,10 +686,7 @@ namespace DynamicPanels
 
 			resizeZone = new GameObject( "ResizeZone" + direction, typeof( RectTransform ) ).AddComponent<PanelResizeHelper>();
 			resizeZone.RectTransform.SetParent( resizeZonesParent, false );
-
-			Image background = resizeZone.gameObject.AddComponent<Image>();
-			background.color = Color.clear;
-			background.sprite = Internal.BackgroundSprite;
+			resizeZone.gameObject.AddComponent<NonDrawingGraphic>();
 
 			resizeZones[(int) direction] = resizeZone;
 

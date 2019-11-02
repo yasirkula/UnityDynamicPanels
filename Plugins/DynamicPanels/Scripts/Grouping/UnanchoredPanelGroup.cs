@@ -45,7 +45,7 @@ namespace DynamicPanels
 		protected override void EnsureMinimumSizeOf( IPanelGroupElement element )
 		{
 			Panel panel = element as Panel;
-			if( panel == null || panel.Equals( null ) )
+			if( !panel )
 				return;
 
 			Vector2 position = panel.Position;
