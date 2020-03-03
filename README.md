@@ -4,7 +4,7 @@
 ![screenshot2](Images/2.png)
 *(used external assets in screenshots: [In-game Debug Console](https://github.com/yasirkula/UnityIngameDebugConsole) and [Runtime Inspector & Hierarchy](https://github.com/yasirkula/UnityRuntimeInspector))*
 
-**Available on Asset Store:** https://www.assetstore.unity3d.com/en/#!/content/114126
+**Available on Asset Store:** https://assetstore.unity.com/packages/tools/gui/dynamic-panels-114126
 
 **Forum Thread:** https://forum.unity.com/threads/released-dynamic-panels-draggable-resizable-dockable-and-stackable-ui-panels.523106/
 
