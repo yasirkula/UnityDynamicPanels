@@ -8,7 +8,7 @@ namespace DynamicPanels
 	[DisallowMultipleComponent]
 	public class Panel : MonoBehaviour, IPanelGroupElement
 	{
-		public class InternalSettings
+		internal class InternalSettings
 		{
 			private readonly Panel panel;
 
@@ -196,7 +196,7 @@ namespace DynamicPanels
 		public DynamicPanelsCanvas Canvas { get { return Group.Canvas; } }
 		public PanelGroup Group { get; private set; }
 
-		public InternalSettings Internal { get; private set; }
+		internal InternalSettings Internal { get; private set; }
 
 #pragma warning disable 0649
 		[SerializeField]
@@ -227,12 +227,24 @@ namespace DynamicPanels
 		public Color TabNormalColor { get { return m_tabNormalColor; } }
 
 		[SerializeField]
+		private Color m_tabNormalTextColor;
+		public Color TabNormalTextColor { get { return m_tabNormalTextColor; } }
+
+		[SerializeField]
 		private Color m_tabSelectedColor;
 		public Color TabSelectedColor { get { return m_tabSelectedColor; } }
 
 		[SerializeField]
+		private Color m_tabSelectedTextColor;
+		public Color TabSelectedTextColor { get { return m_tabSelectedTextColor; } }
+
+		[SerializeField]
 		private Color m_tabDetachingColor;
 		public Color TabDetachingColor { get { return m_tabDetachingColor; } }
+
+		[SerializeField]
+		private Color m_tabDetachingTextColor;
+		public Color TabDetachingTextColor { get { return m_tabDetachingTextColor; } }
 #pragma warning restore 0649
 
 		public Vector2 Position { get { return RectTransform.anchoredPosition; } }
@@ -309,6 +321,8 @@ namespace DynamicPanels
 					tabs[m_activeTab].Internal.SetActive( true );
 
 					contentScrollRect = tabs[m_activeTab].Content.GetComponentInChildren<ScrollRect>();
+
+					PanelNotificationCenter.Internal.ActiveTabChanged( tabs[m_activeTab] );
 				}
 			}
 		}
@@ -478,23 +492,6 @@ namespace DynamicPanels
 			RemoveTab( tab );
 		}
 
-		[System.Obsolete( "Use panel[tabIndex].Icon and panel[tabIndex].Title instead", true )]
-		public void SetTabTitle( int tabIndex, Sprite icon, string label )
-		{
-			if( tabIndex >= 0 && tabIndex < tabs.Count )
-			{
-				tabs[tabIndex].Icon = icon;
-				tabs[tabIndex].Label = label;
-			}
-		}
-
-		[System.Obsolete( "Use panel[tabIndex].MinSize instead", true )]
-		public void SetTabMinSize( int tabIndex, Vector2 minSize )
-		{
-			if( tabIndex >= 0 && tabIndex < tabs.Count )
-				tabs[tabIndex].MinSize = minSize;
-		}
-
 		public int GetTabIndex( RectTransform tabContent )
 		{
 			for( int i = 0; i < tabs.Count; i++ )
@@ -535,33 +532,6 @@ namespace DynamicPanels
 			return null;
 		}
 
-		[System.Obsolete( "Use panel[tabIndex].Content instead", true )]
-		public RectTransform GetTabContent( int tabIndex )
-		{
-			if( tabIndex >= 0 && tabIndex < tabs.Count )
-				return tabs[tabIndex].Content;
-
-			return null;
-		}
-
-		[System.Obsolete( "Use panel[tabIndex].Icon instead", true )]
-		public Sprite GetTabIcon( int tabIndex )
-		{
-			if( tabIndex >= 0 && tabIndex < tabs.Count )
-				return tabs[tabIndex].Icon;
-
-			return null;
-		}
-
-		[System.Obsolete( "Use panel[tabIndex].Label instead", true )]
-		public string GetTabLabel( int tabIndex )
-		{
-			if( tabIndex >= 0 && tabIndex < tabs.Count )
-				return tabs[tabIndex].Label;
-
-			return null;
-		}
-
 		public void DockToRoot( Direction direction )
 		{
 			PanelManager.Instance.AnchorPanel( this, Canvas, direction );
@@ -585,6 +555,11 @@ namespace DynamicPanels
 		public Panel DetachTab( PanelTab tab )
 		{
 			return DetachTab( GetTabIndex( tab ) );
+		}
+
+		public Panel DetachTab( string tabID )
+		{
+			return DetachTab( GetTabIndex( tabID ) );
 		}
 
 		public void BringForward()

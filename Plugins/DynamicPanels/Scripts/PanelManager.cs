@@ -416,6 +416,9 @@ namespace DynamicPanels
 			if( draggedPanel != null )
 				CancelDraggingPanel();
 
+			if( panelTab.Panel.NumberOfTabs == 1 && panelTab.Panel.Canvas.PreventDetachingLastDockedPanel && panelTab.Panel.Canvas.Internal.IsLastDockedPanel( panelTab.Panel ) )
+				return false;
+
 			draggedPanel = panelTab.Panel;
 
 			if( !draggedPanel.IsDocked )

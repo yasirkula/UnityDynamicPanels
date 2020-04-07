@@ -5,7 +5,7 @@ namespace DynamicPanels
 {
 	public class PanelGroup : IPanelGroupElement
 	{
-		public class InternalSettings
+		internal class InternalSettings
 		{
 			private readonly PanelGroup group;
 
@@ -51,7 +51,7 @@ namespace DynamicPanels
 		public DynamicPanelsCanvas Canvas { get; private set; }
 		public PanelGroup Group { get; protected set; }
 
-		public InternalSettings Internal { get; private set; }
+		internal InternalSettings Internal { get; private set; }
 
 		public Vector2 Position { get; protected set; }
 		public Vector2 Size { get; protected set; }

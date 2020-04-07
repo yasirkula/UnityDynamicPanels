@@ -7,7 +7,7 @@ namespace DynamicPanels
 	[DisallowMultipleComponent]
 	public class PanelTab : MonoBehaviour, IPointerClickHandler, IBeginDragHandler, IDragHandler, IEndDragHandler
 	{
-		public class InternalSettings
+		internal class InternalSettings
 		{
 			private readonly PanelTab tab;
 			public readonly RectTransform RectTransform;
@@ -32,6 +32,8 @@ namespace DynamicPanels
 				{
 					tab.ResetBackgroundColor();
 					tab.pointerId = PanelManager.NON_EXISTING_TOUCH;
+
+					PanelNotificationCenter.Internal.TabDragStateChanged( tab, false );
 				}
 			}
 
@@ -49,7 +51,7 @@ namespace DynamicPanels
 		private Text nameHolder;
 #pragma warning restore 0649
 
-		public InternalSettings Internal { get; private set; }
+		internal InternalSettings Internal { get; private set; }
 
 		private string m_id = null;
 		public string ID
@@ -149,6 +151,11 @@ namespace DynamicPanels
 			return m_panel.DetachTab( this );
 		}
 
+		public void Destroy()
+		{
+			m_panel.RemoveTab( this );
+		}
+
 		private void SetActive( bool activeState )
 		{
 			if( !Content )
@@ -156,9 +163,15 @@ namespace DynamicPanels
 			else
 			{
 				if( activeState )
+				{
 					background.color = m_panel.TabSelectedColor;
+					nameHolder.color = m_panel.TabSelectedTextColor;
+				}
 				else
+				{
 					background.color = m_panel.TabNormalColor;
+					nameHolder.color = m_panel.TabNormalTextColor;
+				}
 
 				Content.gameObject.SetActive( activeState );
 			}
@@ -183,7 +196,11 @@ namespace DynamicPanels
 			}
 
 			pointerId = eventData.pointerId;
+
 			background.color = m_panel.TabDetachingColor;
+			nameHolder.color = m_panel.TabDetachingTextColor;
+
+			PanelNotificationCenter.Internal.TabDragStateChanged( this, true );
 		}
 
 		void IDragHandler.OnDrag( PointerEventData eventData )
@@ -206,14 +223,21 @@ namespace DynamicPanels
 			ResetBackgroundColor();
 
 			PanelManager.Instance.OnEndPanelTabTranslate( this, eventData );
+			PanelNotificationCenter.Internal.TabDragStateChanged( this, false );
 		}
 
 		private void ResetBackgroundColor()
 		{
 			if( m_panel.ActiveTab == m_panel.GetTabIndex( this ) )
+			{
 				background.color = m_panel.TabSelectedColor;
+				nameHolder.color = m_panel.TabSelectedTextColor;
+			}
 			else
+			{
 				background.color = m_panel.TabNormalColor;
+				nameHolder.color = m_panel.TabNormalTextColor;
+			}
 		}
 	}
 }

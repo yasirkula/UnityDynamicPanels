@@ -53,6 +53,28 @@ namespace DynamicPanels
 				}
 			}
 
+			public bool IsLastDockedPanel( Panel panel )
+			{
+				return panel.IsDocked && !PanelGroupHasAnyOtherPanels( canvas.RootPanelGroup, panel );
+			}
+
+			private bool PanelGroupHasAnyOtherPanels( PanelGroup group, Panel panel )
+			{
+				for( int i = 0; i < group.Count; i++ )
+				{
+					if( group[i] is Panel )
+					{
+						Panel _panel = (Panel) group[i];
+						if( _panel != panel && _panel != canvas.dummyPanel )
+							return true;
+					}
+					else if( PanelGroupHasAnyOtherPanels( (PanelGroup) group[i], panel ) )
+						return true;
+				}
+
+				return false;
+			}
+
 			public void AnchorZonesSetActive( bool value ) { canvas.AnchorZonesSetActive( value ); }
 			public void ReceiveRaycasts( bool value ) { canvas.background.raycastTarget = value; }
 			public void OnApplicationQuit() { canvas.OnApplicationQuit(); }
@@ -169,6 +191,8 @@ namespace DynamicPanels
 
 		[SerializeField]
 		private Vector2 minimumFreeSpace = new Vector2( 50f, 50f );
+
+		public bool PreventDetachingLastDockedPanel;
 
 		[SerializeField]
 		private float m_panelResizableAreaLength = 12f;

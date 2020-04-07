@@ -4,7 +4,7 @@ namespace DynamicPanels
 {
 	public static class PanelNotificationCenter
 	{
-		public static class Internal
+		internal static class Internal
 		{
 			public static void PanelCreated( Panel panel )
 			{
@@ -52,6 +52,26 @@ namespace DynamicPanels
 				}
 			}
 
+			public static void TabDragStateChanged( PanelTab tab, bool isDragging )
+			{
+				if( isDragging )
+				{
+					if( OnStartedDraggingTab != null )
+						OnStartedDraggingTab( tab );
+				}
+				else
+				{
+					if( OnStoppedDraggingTab != null )
+						OnStoppedDraggingTab( tab );
+				}
+			}
+
+			public static void ActiveTabChanged( PanelTab tab )
+			{
+				if( OnActiveTabChanged != null )
+					OnActiveTabChanged( tab );
+			}
+
 			public static void TabIDChanged( PanelTab tab, string previousID, string newID )
 			{
 				if( !string.IsNullOrEmpty( previousID ) )
@@ -78,7 +98,10 @@ namespace DynamicPanels
 		}
 
 		public delegate void PanelDelegate( Panel panel );
+		public delegate void TabDelegate( PanelTab tab );
+
 		public static event PanelDelegate OnPanelCreated, OnPanelDestroyed, OnPanelBecameActive, OnPanelBecameInactive;
+		public static event TabDelegate OnActiveTabChanged, OnStartedDraggingTab, OnStoppedDraggingTab;
 
 		private static readonly List<Panel> panels = new List<Panel>( 32 );
 		public static int NumberOfPanels { get { return panels.Count; } }

@@ -197,8 +197,11 @@ MonoBehaviour:
   contentParent: {fileID: 224556564501171762}
   headerHeight: 42
   m_tabNormalColor: {r: 0.2784314, g: 0.2784314, b: 0.2784314, a: 1}
+  m_tabNormalTextColor: {r: 0.83823526, g: 0.84439874, b: 0.84439874, a: 1}
   m_tabSelectedColor: {r: 0.375, g: 0.375, b: 0.375, a: 1}
+  m_tabSelectedTextColor: {r: 0.83823526, g: 0.84439874, b: 0.84439874, a: 1}
   m_tabDetachingColor: {r: 0, g: 0.4855985, b: 0.5294118, a: 1}
+  m_tabDetachingTextColor: {r: 0.83823526, g: 0.84439874, b: 0.84439874, a: 1}
 --- !u!222 &222119064064416652
 CanvasRenderer:
   m_ObjectHideFlags: 1

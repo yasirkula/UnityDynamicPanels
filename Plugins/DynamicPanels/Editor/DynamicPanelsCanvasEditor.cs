@@ -29,6 +29,7 @@ namespace DynamicPanels
 
 		private SerializedProperty leaveFreeSpace;
 		private SerializedProperty minimumFreeSpace;
+		private SerializedProperty preventDetachingLastDockedPanel;
 		private SerializedProperty panelResizableAreaLength;
 		private SerializedProperty canvasAnchorZoneLength;
 		private SerializedProperty panelAnchorZoneLength;
@@ -43,6 +44,7 @@ namespace DynamicPanels
 
 			leaveFreeSpace = serializedObject.FindProperty( "m_leaveFreeSpace" );
 			minimumFreeSpace = serializedObject.FindProperty( "minimumFreeSpace" );
+			preventDetachingLastDockedPanel = serializedObject.FindProperty( "PreventDetachingLastDockedPanel" );
 			panelResizableAreaLength = serializedObject.FindProperty( "m_panelResizableAreaLength" );
 			canvasAnchorZoneLength = serializedObject.FindProperty( "m_canvasAnchorZoneLength" );
 			panelAnchorZoneLength = serializedObject.FindProperty( "m_panelAnchorZoneLength" );
@@ -98,12 +100,12 @@ namespace DynamicPanels
 
 			EditorGUILayout.LabelField( "= Properties =", EditorStyles.boldLabel );
 			EditorGUILayout.PropertyField( leaveFreeSpace );
-			GUILayout.BeginHorizontal();
-			GUILayout.Space( 20 );
+			EditorGUI.indentLevel++;
 			GUI.enabled = guiEnabled && leaveFreeSpace.boolValue;
 			EditorGUILayout.PropertyField( minimumFreeSpace );
 			GUI.enabled = guiEnabled;
-			GUILayout.EndHorizontal();
+			EditorGUI.indentLevel--;
+			EditorGUILayout.PropertyField( preventDetachingLastDockedPanel );
 			EditorGUILayout.PropertyField( panelResizableAreaLength );
 			EditorGUILayout.PropertyField( canvasAnchorZoneLength );
 			EditorGUILayout.PropertyField( panelAnchorZoneLength );
