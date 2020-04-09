@@ -10,6 +10,8 @@
 
 **WebGL Demo:** http://yasirkula.net/DynamicPanelsDemo/
 
+**[Support the Developer ☕](https://yasirkula.itch.io/unity3d)**
+
 ## ABOUT
 
 This asset helps you create dynamic panels using Unity's UI system. These panels can be dragged around, resized, docked to canvas edges or to one another and stacked next to each other as separate tabs.
