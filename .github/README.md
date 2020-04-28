@@ -23,9 +23,19 @@ This asset helps you create dynamic panels using Unity's UI system. These panels
 - Has an extensive Scripting API to create/manipulate panels by code
 - Each panel costs 3 additional batches (this number can increase with each tab using a custom icon)
 
+## INSTALLATION
+
+There are 4 ways to install this plugin:
+
+- import [DynamicPanels.unitypackage](https://github.com/yasirkula/UnityDynamicPanels/releases) via *Assets-Import Package*
+- clone/[download](https://github.com/yasirkula/UnityDynamicPanels/archive/master.zip) this repository and move the *Plugins* folder to your Unity project's *Assets* folder
+- import it from [Asset Store](https://assetstore.unity.com/packages/tools/gui/dynamic-panels-114126)
+- *(via Package Manager)* add the following line to *Packages/manifest.json*:
+  - `"com.yasirkula.dynamicpanels": "https://github.com/yasirkula/UnityDynamicPanels.git",`
+
 ## HOW TO
 
-First, import [DynamicPanels.unitypackage](https://github.com/yasirkula/UnityDynamicPanels/releases) to your project. Afterwards, add **Dynamic Panels Canvas** component to the *RectTransform* inside which your panels will reside. This RectTransform doesn't have to be the Canvas object itself, it can be a child of the canvas and it can have a custom size.
+Add **Dynamic Panels Canvas** component to the *RectTransform* inside which your panels will reside. This RectTransform doesn't have to be the Canvas object itself, it can be a child of the canvas and it can have a custom size.
 
 There are two ways to create panels: by using the GUI of Dynamic Panels Canvas or via Scripting API. There are also two types of panels: *free panels* that can be moved around and resized freely and *docked panels* that are moved by the layout system, depending on where it is docked to. A panel can have multiple tabs.
 

@@ -1,0 +1,6 @@
+{
+  "name": "com.yasirkula.dynamicpanels",
+  "displayName": "Dynamic Panels",
+  "version": "1.2.4",
+  "description": "This asset helps you create dynamic panels using Unity's UI system. These panels can be dragged around, resized, docked to canvas edges or to one another and stacked next to each other as separate tabs."
+}
