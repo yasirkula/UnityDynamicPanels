@@ -65,6 +65,17 @@ namespace DynamicPanels
 				ValidateTabs();
 			}
 
+			public void ChangeCloseButtonVisibility( bool isVisible )
+			{
+				if( panel.closeButton && isVisible != panel.closeButton.gameObject.activeSelf )
+				{
+					panel.closeButton.gameObject.SetActive( isVisible );
+
+					float panelHeaderPadding = ( (RectTransform) panel.closeButton.transform ).rect.width;
+					( (RectTransform) panel.header.transform ).offsetMax += new Vector2( isVisible ? -panelHeaderPadding : panelHeaderPadding, 0f );
+				}
+			}
+
 			public void ValidateTabs()
 			{
 				if( IsDummy )
@@ -208,6 +219,9 @@ namespace DynamicPanels
 
 		[SerializeField]
 		private RectTransform contentParent;
+
+		[SerializeField]
+		private Button closeButton;
 #pragma warning restore 0649
 
 		private RectTransform resizeZonesParent;
@@ -348,6 +362,9 @@ namespace DynamicPanels
 			InitializeAnchorZone();
 
 			AnchorZonesSetActive( false );
+
+			closeButton.onClick.AddListener( () => PanelNotificationCenter.Internal.PanelClosed( this ) );
+			closeButton.transform.SetAsLastSibling();
 		}
 
 		private void Start()

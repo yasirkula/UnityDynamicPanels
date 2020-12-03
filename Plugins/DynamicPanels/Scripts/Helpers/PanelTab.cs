@@ -26,6 +26,17 @@ namespace DynamicPanels
 				tab.Content = content;
 			}
 
+			public void ChangeCloseButtonVisibility( bool isVisible )
+			{
+				if( tab.closeButton && isVisible != tab.closeButton.gameObject.activeSelf )
+				{
+					tab.closeButton.gameObject.SetActive( isVisible );
+
+					float tabSizeDelta = tab.closeButton.GetComponent<LayoutElement>().preferredWidth;
+					tab.GetComponent<LayoutElement>().preferredWidth += isVisible ? tabSizeDelta : -tabSizeDelta;
+				}
+			}
+
 			public void Stop()
 			{
 				if( tab.pointerId != PanelManager.NON_EXISTING_TOUCH )
@@ -49,6 +60,9 @@ namespace DynamicPanels
 
 		[SerializeField]
 		private Text nameHolder;
+
+		[SerializeField]
+		private Button closeButton;
 #pragma warning restore 0649
 
 		internal InternalSettings Internal { get; private set; }
@@ -123,6 +137,8 @@ namespace DynamicPanels
 			Internal = new InternalSettings( this );
 
 			iconHolder.preserveAspect = true;
+
+			closeButton.onClick.AddListener( () => PanelNotificationCenter.Internal.TabClosed( this ) );
 		}
 
 		private void Start()

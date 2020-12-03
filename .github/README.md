@@ -235,11 +235,19 @@ Notification center raises certain events during panels' lifecycle. It also hold
 
 `static event PanelDelegate OnPanelBecameInactive`: raised when a panel becomes inactive in the hierarchy
 
-`static event TabDelegate OnActiveTabChanged`: raised when a panel's active tab changes. *TabDelegate* takes a *PanelTab* parameter
+`static event PanelDelegate OnPanelClosed`: raised when a panel's close button is clicked. By default, panels' close buttons are hidden. Once a functions is registered to this event, close buttons will become visible. Note that the panel won't be destroyed automatically after clicking the close button, it is your job to implement panel close functionality according to your needs in the registered function(s)
+
+`static event TabDelegate OnTabCreated`: raised when a new tab is created. *TabDelegate* takes a *PanelTab* parameter
+
+`static event TabDelegate OnTabDestroyed`: raised when a new tab is destroyed
+
+`static event TabDelegate OnActiveTabChanged`: raised when a panel's active tab changes
 
 `static event TabDelegate OnStartedDraggingTab`: raised when user starts dragging a tab
 
 `static event TabDelegate OnStoppedDraggingTab`: raised when user stops dragging a tab or system force stops a drag operation
+
+`static event TabDelegate OnTabClosed`: raised when a tab's close button is clicked. By default, tabs' close buttons are hidden. Once a functions is registered to this event, close buttons will become visible. Note that the tab won't be destroyed automatically after clicking the close button, it is your job to implement tab close functionality according to your needs in the registered function(s)
 
 `static int NumberOfPanels { get; }`: returns the number of alive panels (including inactive panels)
 
