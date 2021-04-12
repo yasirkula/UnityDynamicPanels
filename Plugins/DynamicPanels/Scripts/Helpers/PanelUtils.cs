@@ -4,7 +4,7 @@ namespace DynamicPanels
 {
 	public static class PanelUtils
 	{
-		public static class Internal
+		internal static class Internal
 		{
 			public static Panel CreatePanel( RectTransform content, DynamicPanelsCanvas canvas )
 			{

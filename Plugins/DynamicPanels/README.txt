@@ -21,6 +21,7 @@ There are a couple of settings in Dynamic Panels Canvas that you may want to twe
 
 - Leave Free Space: when enabled, there will always be some free space in the canvas that docked panels can't fill. Otherwise, docked panels will fill the whole canvas
 - Minimum Free Space: if Leave Free Space is enabled, this value will determine the minimum free space
+- Free Space Target Transform: if Leave Free Space is enabled and a RectTransform is assigned to this variable, the RectTransform's properties will automatically be updated to always match the free space's position and size
 - Prevent Detaching Last Docked Panel: when enabled, trying to detach the last docked panel from the canvas will automatically fail
 - Panel Resizable Area Length: size of the invisible resize zones at each side of the panels that allow users to resize the panels
 - Canvas Anchor Zone Length: size of the Dynamic Panels Canvas' drop zones. When a tab is dragged and dropped onto that area, it will be docked to that edge of the Dynamic Panels Canvas

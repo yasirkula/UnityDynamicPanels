@@ -15,7 +15,7 @@ namespace DynamicPanels
 		private int pointerId = PanelManager.NON_EXISTING_TOUCH;
 
 		private Vector2 m_initialTouchPos;
-		public Vector2 InitialTouchPos { get { return m_initialTouchPos; } }
+		internal Vector2 InitialTouchPos { get { return m_initialTouchPos; } }
 
 		private void OnEnable()
 		{

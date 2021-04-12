@@ -3,12 +3,18 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
+#if UNITY_2017_3_OR_NEWER
+[assembly: System.Runtime.CompilerServices.InternalsVisibleTo( "DynamicPanels.Editor" )]
+#else
+[assembly: System.Runtime.CompilerServices.InternalsVisibleTo( "Assembly-CSharp-Editor" )]
+[assembly: System.Runtime.CompilerServices.InternalsVisibleTo( "Assembly-CSharp-Editor-firstpass" )]
+#endif
 namespace DynamicPanels
 {
 	[DisallowMultipleComponent]
 	public class DynamicPanelsCanvas : MonoBehaviour, IPointerEnterHandler, ISerializationCallbackReceiver
 	{
-		public class InternalSettings
+		internal class InternalSettings
 		{
 			private readonly DynamicPanelsCanvas canvas;
 			public readonly Camera worldCamera;
@@ -133,7 +139,7 @@ namespace DynamicPanels
 
 #if UNITY_EDITOR
 		private InternalSettings m_internal;
-		public InternalSettings Internal
+		internal InternalSettings Internal
 		{
 			get
 			{
@@ -144,7 +150,7 @@ namespace DynamicPanels
 			}
 		}
 #else
-		public InternalSettings Internal { get; private set; }
+		internal InternalSettings Internal { get; private set; }
 #endif
 
 		[SerializeField]
@@ -191,6 +197,10 @@ namespace DynamicPanels
 
 		[SerializeField]
 		private Vector2 minimumFreeSpace = new Vector2( 50f, 50f );
+
+		[SerializeField]
+		private RectTransform freeSpaceTargetTransform;
+		private Vector2 freeSpacePrevPos, freeSpacePrevSize;
 
 		public bool PreventDetachingLastDockedPanel;
 
@@ -278,6 +288,17 @@ namespace DynamicPanels
 			initialPanelsAnchored = null;
 			initialPanelsAnchoredSerialized = null;
 
+			if( freeSpaceTargetTransform )
+			{
+				if( freeSpaceTargetTransform.parent != RectTransform )
+					freeSpaceTargetTransform.SetParent( RectTransform, false );
+
+				freeSpaceTargetTransform.anchorMin = Vector2.zero;
+				freeSpaceTargetTransform.anchorMax = Vector2.zero;
+				freeSpaceTargetTransform.pivot = Vector2.zero;
+				freeSpaceTargetTransform.SetAsFirstSibling();
+			}
+
 			LeaveFreeSpace = m_leaveFreeSpace;
 			LateUpdate(); // Update layout
 
@@ -331,6 +352,20 @@ namespace DynamicPanels
 				UnanchoredPanelGroup.Internal.EnsureMinimumSize();
 
 				isDirty = false;
+			}
+
+			if( m_leaveFreeSpace && freeSpaceTargetTransform )
+			{
+				Vector2 freeSpacePos = dummyPanel.Position;
+				Vector2 freeSpaceSize = dummyPanel.Size;
+				if( freeSpacePos != freeSpacePrevPos || freeSpaceSize != freeSpacePrevSize )
+				{
+					freeSpacePrevPos = freeSpacePos;
+					freeSpacePrevSize = freeSpaceSize;
+
+					freeSpaceTargetTransform.anchoredPosition = freeSpacePos;
+					freeSpaceTargetTransform.sizeDelta = freeSpaceSize;
+				}
 			}
 		}
 
