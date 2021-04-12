@@ -3,10 +3,11 @@
 Online documentation & example code available at: https://github.com/yasirkula/UnityDynamicPanels
 E-mail: yasirkula@gmail.com
 
-1. ABOUT
+### ABOUT
 This asset helps you create dynamic panels using Unity's UI system. These panels can be dragged around, resized, docked to canvas edges or to one another and stacked next to each other as separate tabs.
 
-2. HOW TO
+
+### HOW TO
 First, add Dynamic Panels Canvas component to the RectTransform inside which your panels will reside. This RectTransform doesn't have to be the Canvas object itself, it can be a child of the canvas and it can have a custom size.
 
 There are two ways to create panels: by using the GUI of Dynamic Panels Canvas or via Scripting API. There are also two types of panels: free panels that can be moved around and resized freely and docked panels that are moved by the layout system, depending on where it is docked to. A panel can have multiple tabs.
@@ -30,8 +31,14 @@ There are a couple of settings in Dynamic Panels Canvas that you may want to twe
 
 NOTE: if you change the Resources/DynamicPanel.prefab, also make sure that the Panel's Header Height property is equal to the distance between the top of the panel and the bottom of the PanelHeader child object (which holds the tabs at runtime).
 
-2.1. PanelCursorHandler Component
 
-Adding this component to a GameObject will make the cursor dynamic i.e. its texture will change when it enters a panel's resizable area.
+### PanelCursorHandler COMPONENT
+Adding this component to a GameObject will make the cursor dynamic i.e. its texture will change when it enters a panel's resizable area. Note that this component won't have any effect on Android and iOS.
 
-Note that this component won't have any effect on Android and iOS.
+
+### NEW INPUT SYSTEM SUPPORT
+This plugin supports Unity's new Input System but it requires some manual modifications (if both the legacy and the new input systems are active at the same time, no changes are needed):
+
+- the plugin mustn't be installed as a package, i.e. it must reside inside the Assets folder and not the Packages folder (it can reside inside a subfolder of Assets like Assets/Plugins)
+- if Unity 2019.2.5 or earlier is used, add ENABLE_INPUT_SYSTEM compiler directive to "Player Settings/Scripting Define Symbols" (these symbols are platform specific, so if you change the active platform later, you'll have to add the compiler directive again)
+- add "Unity.InputSystem" assembly to "DynamicPanels.Runtime" Assembly Definition File's "Assembly Definition References" list

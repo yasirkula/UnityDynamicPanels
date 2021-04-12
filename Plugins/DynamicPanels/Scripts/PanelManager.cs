@@ -1,6 +1,9 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
+#if ENABLE_INPUT_SYSTEM && !ENABLE_LEGACY_INPUT_MANAGER
+using UnityEngine.InputSystem;
+#endif
 
 namespace DynamicPanels
 {
@@ -68,6 +71,18 @@ namespace DynamicPanels
 		{
 			if( draggedPanel == null )
 			{
+#if ENABLE_INPUT_SYSTEM && !ENABLE_LEGACY_INPUT_MANAGER
+				if( Pointer.current != null )
+				{
+					if( Pointer.current.press.wasPressedThisFrame )
+						BringClickedPanelToForward( Pointer.current.position.ReadValue() );
+					else if( Mouse.current != null )
+					{
+						if( Mouse.current.rightButton.wasPressedThisFrame || Mouse.current.middleButton.wasPressedThisFrame )
+							BringClickedPanelToForward( Mouse.current.position.ReadValue() );
+					}
+				}
+#else
 				if( Input.touchCount == 0 )
 				{
 					if( Input.GetMouseButtonDown( 0 ) || Input.GetMouseButtonDown( 1 ) || Input.GetMouseButtonDown( 2 ) )
@@ -82,6 +97,7 @@ namespace DynamicPanels
 							BringClickedPanelToForward( touch.position );
 					}
 				}
+#endif
 			}
 
 			if( Time.realtimeSinceStartup >= nextPanelValidationTime )
