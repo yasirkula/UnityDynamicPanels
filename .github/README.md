@@ -8,6 +8,8 @@
 
 **Forum Thread:** https://forum.unity.com/threads/released-dynamic-panels-draggable-resizable-dockable-and-stackable-ui-panels.523106/
 
+**Discord:** https://discord.gg/UJJt549AaV
+
 **WebGL Demo:** http://yasirkula.net/DynamicPanelsDemo/
 
 **[Support the Developer ☕](https://yasirkula.itch.io/unity3d)**
