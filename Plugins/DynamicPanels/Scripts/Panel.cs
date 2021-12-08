@@ -115,7 +115,7 @@ namespace DynamicPanels
 						if( i > 0 )
 							i--;
 
-						tabPreviewRect = new Vector2( tabPosition, panel.tabs[i].Internal.RectTransform.sizeDelta.x + 4f );
+						tabPreviewRect = new Vector2( offset + tabPosition, panel.tabs[i].Internal.RectTransform.sizeDelta.x + 4f );
 						return i;
 					}
 
@@ -136,7 +136,7 @@ namespace DynamicPanels
 					return tabCount;
 				}
 
-				tabPreviewRect = new Vector2( tabPosition, tabSize + 4f );
+				tabPreviewRect = new Vector2( offset + tabPosition, tabSize + 4f );
 				return tabCount - 1;
 			}
 
