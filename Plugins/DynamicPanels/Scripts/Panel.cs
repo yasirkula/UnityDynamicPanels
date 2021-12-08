@@ -96,9 +96,10 @@ namespace DynamicPanels
 			public int GetTabIndexAt( PointerEventData pointer, out Vector2 tabPreviewRect ) // x: position, y: size
 			{
 				int tabCount = panel.tabs.Count;
+				float offset = panel.tabsParent.anchoredPosition.x;
 				if( tabCount == 0 )
 				{
-					tabPreviewRect = new Vector2( 0f, panel.Size.x );
+					tabPreviewRect = new Vector2( offset, panel.Size.x );
 					return 0;
 				}
 
@@ -126,11 +127,11 @@ namespace DynamicPanels
 				{
 					float remainingSize = panel.Size.x - tabPosition - tabSize;
 					if( remainingSize < 30f )
-						tabPreviewRect = new Vector2( tabPosition + tabSize * 0.5f, remainingSize + tabSize * 0.5f );
+						tabPreviewRect = new Vector2( offset + tabPosition + tabSize * 0.5f, remainingSize + tabSize * 0.5f );
 					else if( remainingSize > tabSize )
-						tabPreviewRect = new Vector2( tabPosition + tabSize, tabSize );
+						tabPreviewRect = new Vector2( offset + tabPosition + tabSize, tabSize );
 					else
-						tabPreviewRect = new Vector2( tabPosition + tabSize, remainingSize );
+						tabPreviewRect = new Vector2( offset + tabPosition + tabSize, remainingSize );
 
 					return tabCount;
 				}
