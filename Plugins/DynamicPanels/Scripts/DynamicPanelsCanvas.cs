@@ -83,7 +83,7 @@ namespace DynamicPanels
 
 			public void AnchorZonesSetActive( bool value ) { canvas.AnchorZonesSetActive( value ); }
 			public void ReceiveRaycasts( bool value ) { canvas.background.raycastTarget = value; }
-			public void OnApplicationQuit() { canvas.OnApplicationQuit(); }
+			public void OnApplicationQuitting() { canvas.OnApplicationQuitting(); }
 		}
 
 		[System.Serializable]
@@ -260,6 +260,8 @@ namespace DynamicPanels
 			}
 
 			PanelManager.Instance.RegisterCanvas( this );
+
+			Application.quitting += OnApplicationQuitting;
 		}
 
 		private void Start()
@@ -323,7 +325,7 @@ namespace DynamicPanels
 				PanelManager.Instance.UnregisterCanvas( this );
 		}
 
-		private void OnApplicationQuit()
+		private void OnApplicationQuitting()
 		{
 			isQuitting = true;
 		}

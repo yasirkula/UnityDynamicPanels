@@ -56,15 +56,17 @@ namespace DynamicPanels
 
 			nextPanelValidationTime = Time.realtimeSinceStartup + PANEL_TABS_VALIDATE_INTERVAL;
 			nullPointerEventData = new PointerEventData( null );
+
+			Application.quitting += OnApplicationQuitting;
 		}
 
-		private void OnApplicationQuit()
+		private void OnApplicationQuitting()
 		{
 			for( int i = 0; i < panels.Count; i++ )
-				panels[i].Internal.OnApplicationQuit();
+				panels[i].Internal.OnApplicationQuitting();
 
 			for( int i = 0; i < canvases.Count; i++ )
-				canvases[i].Internal.OnApplicationQuit();
+				canvases[i].Internal.OnApplicationQuitting();
 		}
 
 		private void Update()

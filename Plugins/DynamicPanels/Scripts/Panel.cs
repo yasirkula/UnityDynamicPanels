@@ -199,7 +199,7 @@ namespace DynamicPanels
 			public void AnchorZonesSetActive( bool value ) { panel.AnchorZonesSetActive( value ); }
 			public void OnResize( Direction direction, Vector2 screenPoint ) { panel.OnResize( direction, screenPoint ); }
 			public void OnTranslate( Vector2 deltaPosition ) { panel.OnTranslate( deltaPosition ); }
-			public void OnApplicationQuit() { panel.OnApplicationQuit(); }
+			public void OnApplicationQuitting() { panel.OnApplicationQuitting(); }
 		}
 
 		public RectTransform RectTransform { get; private set; }
@@ -366,6 +366,8 @@ namespace DynamicPanels
 
 			closeButton.onClick.AddListener( () => PanelNotificationCenter.Internal.PanelClosed( this ) );
 			closeButton.transform.SetAsLastSibling();
+
+			Application.quitting += OnApplicationQuitting;
 		}
 
 		private void Start()
@@ -407,7 +409,7 @@ namespace DynamicPanels
 			}
 		}
 
-		private void OnApplicationQuit()
+		private void OnApplicationQuitting()
 		{
 			isQuitting = true;
 		}
