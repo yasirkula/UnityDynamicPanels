@@ -56,9 +56,27 @@ namespace DynamicPanels
 
 			nextPanelValidationTime = Time.realtimeSinceStartup + PANEL_TABS_VALIDATE_INTERVAL;
 			nullPointerEventData = new PointerEventData( null );
+
+#if UNITY_2018_1_OR_NEWER
+			// OnApplicationQuit isn't reliable on some Unity versions when Application.wantsToQuit is used; Application.quitting is the only reliable solution on those versions
+			// https://issuetracker.unity3d.com/issues/onapplicationquit-method-is-called-before-application-dot-wantstoquit-event-is-raised
+			Application.quitting -= OnApplicationQuitting;
+			Application.quitting += OnApplicationQuitting;
+#endif
 		}
 
+#if UNITY_2018_1_OR_NEWER
+		private void OnDestroy()
+		{
+			Application.quitting -= OnApplicationQuitting;
+		}
+#endif
+
+#if UNITY_2018_1_OR_NEWER
+		private void OnApplicationQuitting()
+#else
 		private void OnApplicationQuit()
+#endif
 		{
 			for( int i = 0; i < panels.Count; i++ )
 				panels[i].Internal.OnApplicationQuit();
