@@ -273,7 +273,7 @@ namespace DynamicPanels
 		public Vector2 Position { get { return RectTransform.anchoredPosition; } }
 		public Vector2 Size { get { return RectTransform.sizeDelta; } }
 
-		private Vector2 m_minSize = new Vector2( 200f, 200f );
+		private Vector2 m_minSize = new Vector2( -1f, -1f );
 		public Vector2 MinSize
 		{
 			get { return m_minSize; }
