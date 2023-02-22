@@ -474,11 +474,11 @@ namespace DynamicPanels
 					tab.Panel.Internal.RemoveTab( tab.Index, false );
 				}
 
-				tab.Internal.Initialize( this, tabContent );
-				tab.Internal.RectTransform.SetSiblingIndex( tabIndex );
-
 				tabContent.SetParent( null, false ); // workaround for a rare internal Unity crash
 				tabContent.SetParent( contentParent, false );
+				
+				tab.Internal.Initialize( this, tabContent );
+				tab.Internal.RectTransform.SetSiblingIndex( tabIndex );
 
 				Internal.RecalculateMinSize();
 			}
