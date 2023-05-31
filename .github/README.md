@@ -12,7 +12,7 @@
 
 **WebGL Demo:** http://yasirkula.net/DynamicPanelsDemo/
 
-**[Support the Developer ☕](https://yasirkula.itch.io/unity3d)**
+**[GitHub Sponsors ☕](https://github.com/sponsors/yasirkula)**
 
 ## ABOUT
 
