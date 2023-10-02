@@ -273,7 +273,7 @@ namespace DynamicPanels
 		public Vector2 Position { get { return RectTransform.anchoredPosition; } }
 		public Vector2 Size { get { return RectTransform.sizeDelta; } }
 
-		private Vector2 m_minSize = new Vector2( 200f, 200f );
+		private Vector2 m_minSize = new Vector2( -1f, -1f );
 		public Vector2 MinSize
 		{
 			get { return m_minSize; }
@@ -450,6 +450,7 @@ namespace DynamicPanels
 				tabIndex = tabs.Count;
 
 			int thisTabIndex = GetTabIndex( tabContent );
+			Vector2? newTabContentSize = null;
 			if( thisTabIndex == -1 )
 			{
 				PanelTab tab = PanelUtils.GetAssociatedTab( tabContent );
@@ -458,6 +459,7 @@ namespace DynamicPanels
 					tab = (PanelTab) Instantiate( Resources.Load<PanelTab>( "DynamicPanelTab" ), tabsParent, false );
 					tabs.Insert( tabIndex, tab );
 
+					newTabContentSize = tabContent.rect.size;
 					tabContent.anchorMin = Vector2.zero;
 					tabContent.anchorMax = Vector2.one;
 					tabContent.sizeDelta = Vector2.zero;
@@ -475,8 +477,9 @@ namespace DynamicPanels
 				}
 
 				tab.Internal.Initialize( this, tabContent );
+				if (newTabContentSize != null) tab.MinSize = newTabContentSize.Value;
 				tab.Internal.RectTransform.SetSiblingIndex( tabIndex );
-
+				
 				tabContent.SetParent( null, false ); // workaround for a rare internal Unity crash
 				tabContent.SetParent( contentParent, false );
 
