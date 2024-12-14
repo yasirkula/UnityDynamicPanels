@@ -16,7 +16,11 @@ namespace DynamicPanels
 
 					if( canvas == null )
 					{
+#if UNITY_2022_3_OR_NEWER
+						canvas = Object.FindFirstObjectByType<DynamicPanelsCanvas>();
+#else
 						canvas = Object.FindObjectOfType<DynamicPanelsCanvas>();
+#endif
 						if( !canvas )
 						{
 							Debug.LogError( "Panels require a DynamicPanelsCanvas!" );
