@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using UnityEngine;
 
 namespace DynamicPanels
 {
@@ -193,6 +194,25 @@ namespace DynamicPanels
 		public static int NumberOfPanels { get { return panels.Count; } }
 
 		private static readonly Dictionary<string, PanelTab> idToTab = new Dictionary<string, PanelTab>( 32 );
+
+		[RuntimeInitializeOnLoadMethod( RuntimeInitializeLoadType.SubsystemRegistration )] // Configurable Enter Play Mode: https://docs.unity3d.com/Manual/DomainReloading.html
+		private static void ResetStatics()
+		{
+			OnPanelCreated = null;
+			OnPanelDestroyed = null;
+			OnPanelBecameActive = null;
+			OnPanelBecameInactive = null;
+			OnTabCreated = null;
+			OnTabDestroyed = null;
+			OnActiveTabChanged = null;
+			OnStartedDraggingTab = null;
+			OnStoppedDraggingTab = null;
+			m_onPanelClosed = null;
+			m_onTabClosed = null;
+
+			panels.Clear();
+			idToTab.Clear();
+		}
 
 		public static Panel GetPanel( int panelIndex )
 		{

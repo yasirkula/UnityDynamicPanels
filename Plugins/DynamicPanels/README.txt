@@ -1,4 +1,4 @@
-= Dynamic Panels (v1.3.2) =
+= Dynamic Panels (v1.3.3) =
 
 Documentation: https://github.com/yasirkula/UnityDynamicPanels
 FAQ: https://github.com/yasirkula/UnityDynamicPanels#faq
