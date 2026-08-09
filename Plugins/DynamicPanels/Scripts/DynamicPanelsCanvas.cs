@@ -12,22 +12,23 @@ namespace DynamicPanels
 		internal class InternalSettings
 		{
 			private readonly DynamicPanelsCanvas canvas;
-			public readonly Camera worldCamera;
+			public Camera worldCamera
+            {
+                get
+                {
+                    Canvas unityCanvas = canvas.UnityCanvas;
+                    if (unityCanvas == null) // is null while inspecting this component in edit mode
+                        return null;
+                    else if (unityCanvas.renderMode == RenderMode.ScreenSpaceOverlay || (unityCanvas.renderMode == RenderMode.ScreenSpaceCamera && !unityCanvas.worldCamera))
+                        return null;
+                    else
+                        return (unityCanvas.worldCamera != null) ? unityCanvas.worldCamera : Camera.main;
+                }
+            }
 
 			public InternalSettings( DynamicPanelsCanvas canvas )
 			{
 				this.canvas = canvas;
-
-#if UNITY_EDITOR
-				if( !canvas.UnityCanvas ) // is null while inspecting this component in edit mode
-					return;
-#endif
-
-				if( canvas.UnityCanvas.renderMode == RenderMode.ScreenSpaceOverlay ||
-					( canvas.UnityCanvas.renderMode == RenderMode.ScreenSpaceCamera && !canvas.UnityCanvas.worldCamera ) )
-					worldCamera = null;
-				else
-					worldCamera = canvas.UnityCanvas.worldCamera ? canvas.UnityCanvas.worldCamera : Camera.main;
 			}
 
 			public Panel DummyPanel { get { return canvas.dummyPanel; } }
