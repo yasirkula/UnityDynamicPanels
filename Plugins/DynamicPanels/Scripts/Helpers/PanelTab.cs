@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.Assertions;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
@@ -24,6 +25,7 @@ namespace DynamicPanels
 			{
 				tab.m_panel = panel;
 				tab.Content = content;
+				tab.MinSize = content.rect.size;
 			}
 
 			public void ChangeCloseButtonVisibility( bool isVisible )
@@ -98,6 +100,8 @@ namespace DynamicPanels
 			{
 				if( m_minSize != value )
 				{
+					if (value.x < 0) value = new Vector2(-value.x, value.y);
+					if (value.y < 0) value = new Vector2(value.x, -value.y);
 					m_minSize = value;
 					m_panel.Internal.RecalculateMinSize();
 				}
@@ -131,7 +135,7 @@ namespace DynamicPanels
 
 		private void Awake()
 		{
-			m_minSize = new Vector2( 100f, 100f );
+			m_minSize = new Vector2( -1f, -1f );
 			Internal = new InternalSettings( this );
 
 			iconHolder.preserveAspect = true;
